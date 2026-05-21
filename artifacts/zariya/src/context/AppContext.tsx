@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { User, ServiceProfile, Listing, ServiceItem } from "@/types";
+import { User, ServiceProfile, Listing, Job } from "@/types";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -178,6 +178,128 @@ const DEMO_PROFILES: ServiceProfile[] = [
   },
 ];
 
+const DEMO_JOBS: Job[] = [
+  {
+    id: "job_001",
+    userId: "biz_001",
+    posterName: "Mehta Electricals & Hardware",
+    listingType: "opening",
+    title: "Electrician Required – Residential Projects",
+    category: "Electrician",
+    city: "Surat",
+    area: "Adajan",
+    description: "We are a growing electrical contractor firm in Surat looking for a skilled electrician for residential and commercial projects. Must have experience with wiring, panel boards, and basic troubleshooting. Tools provided. Regular work guaranteed.",
+    salary: "₹18,000–₹25,000/month",
+    employmentType: "Full-time",
+    experience: "2+ years",
+    contact: "+91 94270 11001",
+    active: true,
+    createdAt: "2025-02-01T10:00:00Z",
+  },
+  {
+    id: "job_002",
+    userId: "biz_002",
+    posterName: "Radha Beauty Salon & Academy",
+    listingType: "opening",
+    title: "Beautician & Makeup Artist Wanted",
+    category: "Beautician",
+    city: "Ahmedabad",
+    area: "Satellite",
+    description: "Established beauty salon in Satellite, Ahmedabad hiring a full-time beautician. Skills needed: facials, waxing, threading, basic makeup. Training provided for the right candidate. Friendly team, good earning potential with commission on bridal bookings.",
+    salary: "₹12,000–₹20,000/month + commission",
+    employmentType: "Full-time",
+    experience: "1+ years",
+    contact: "+91 94270 11002",
+    active: true,
+    createdAt: "2025-02-03T10:00:00Z",
+  },
+  {
+    id: "job_003",
+    userId: "biz_003",
+    posterName: "Shri Anand Catering Services",
+    listingType: "opening",
+    title: "Cook / Helper Needed for Catering Events",
+    category: "Catering Service",
+    city: "Vadodara",
+    area: "Gotri",
+    description: "Reputed catering service in Vadodara seeks experienced cook and kitchen helpers for weddings, corporate events, and puja functions. Weekend-heavy work. Prior experience with Gujarati and Rajasthani cuisine preferred. Transport provided.",
+    salary: "₹800–₹1,200/day",
+    employmentType: "Daily Wage",
+    experience: "Any",
+    contact: "+91 94270 11003",
+    active: true,
+    createdAt: "2025-02-05T10:00:00Z",
+  },
+  {
+    id: "job_004",
+    userId: "biz_004",
+    posterName: "Sunshine Kids School",
+    listingType: "opening",
+    title: "Home Tutor Required – Maths & Science (Classes 8–10)",
+    category: "Home Tutor",
+    city: "Navsari",
+    area: "Jalalpor Road",
+    description: "Parents' group in Navsari looking for a qualified tutor for Maths and Science, Classes 8–10. Sessions to be held at student's home in Jalalpor area. 5 days a week, morning or evening slots available. Gujarati-medium or English-medium both welcome.",
+    salary: "₹8,000–₹12,000/month",
+    employmentType: "Part-time",
+    experience: "Graduate preferred",
+    contact: "+91 94270 11004",
+    active: true,
+    createdAt: "2025-02-07T10:00:00Z",
+  },
+  {
+    id: "job_005",
+    userId: "biz_005",
+    posterName: "Arjun Patel",
+    listingType: "seeker",
+    title: "Experienced Carpenter – Looking for Full-time Work",
+    category: "Carpenter",
+    city: "Surat",
+    area: "Katargam",
+    description: "I am Arjun Patel, a carpenter with 8 years of experience in furniture making, kitchen fittings, and door/window installation. Currently looking for full-time work with a contractor or workshop in Surat. Skilled in both teak and plywood work. Tools available.",
+    salary: "Expected ₹20,000–₹28,000/month",
+    employmentType: "Full-time",
+    experience: "8 years",
+    contact: "+91 94270 22001",
+    active: true,
+    createdAt: "2025-02-09T10:00:00Z",
+  },
+  {
+    id: "job_006",
+    userId: "biz_006",
+    posterName: "Sunita Bai",
+    listingType: "seeker",
+    title: "Cleaning & Housekeeping – Available for Daily or Monthly Work",
+    category: "Cleaning Service",
+    city: "Ahmedabad",
+    area: "Prahlad Nagar",
+    description: "I have 6 years of experience in home and office cleaning, including utensil washing, sweeping, mopping, and cooking assistance. Currently available for daily or monthly domestic work in Prahlad Nagar and nearby areas. Reliable and trustworthy. References available.",
+    salary: "₹6,000–₹9,000/month or ₹300/day",
+    employmentType: "Full-time",
+    experience: "6 years",
+    contact: "+91 94270 22002",
+    active: true,
+    createdAt: "2025-02-11T10:00:00Z",
+  },
+  {
+    id: "job_007",
+    userId: "biz_007",
+    posterName: "Ravi Sharma",
+    listingType: "seeker",
+    title: "Security Guard – Seeking Placement in Surat or Vadodara",
+    category: "Security Guard",
+    city: "Vadodara",
+    area: "Manjalpur",
+    description: "Ex-Army trained security professional with 5 years of private security experience. Comfortable with night shifts. Looking for a placement with a housing society, mall, or factory in Vadodara or Surat. Police verification documents ready. Honest and punctual.",
+    salary: "Expected ₹14,000–₹18,000/month",
+    employmentType: "Full-time",
+    experience: "5 years",
+    contact: "+91 94270 22003",
+    active: true,
+    createdAt: "2025-02-13T10:00:00Z",
+  },
+];
+
 const SEED_USERS: User[] = [
   {
     id: "demo_seed_user",
@@ -196,6 +318,7 @@ interface AppContextType {
   users: User[];
   profiles: ServiceProfile[];
   listings: Listing[];
+  jobs: Job[];
   login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   register: (data: Omit<User, "id" | "createdAt">) => { success: boolean; error?: string };
@@ -207,6 +330,10 @@ interface AppContextType {
   updateListing: (id: string, data: Partial<Listing>) => void;
   deleteListing: (id: string) => void;
   getListingsByUserId: (userId: string) => Listing[];
+  addJob: (data: Omit<Job, "id" | "createdAt">) => Job;
+  updateJob: (id: string, data: Partial<Job>) => void;
+  deleteJob: (id: string) => void;
+  getJobsByUserId: (userId: string) => Job[];
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -258,9 +385,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     load<Listing[]>("fw_listings", [])
   );
 
+  const [jobs, setJobs] = useState<Job[]>(() => {
+    const stored = load<Job[]>("fw_jobs", []);
+    if (stored.length === 0) {
+      save("fw_jobs", DEMO_JOBS);
+      return DEMO_JOBS;
+    }
+    return stored;
+  });
+
   useEffect(() => { save("fw_users", users); }, [users]);
   useEffect(() => { save("fw_profiles", profiles); }, [profiles]);
   useEffect(() => { save("fw_listings", listings); }, [listings]);
+  useEffect(() => { save("fw_jobs", jobs); }, [jobs]);
 
   const login = useCallback((email: string, password: string) => {
     const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
@@ -319,12 +456,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getListingsByUserId = useCallback((userId: string) =>
     listings.filter((l) => l.userId === userId), [listings]);
 
+  const addJob = useCallback((data: Omit<Job, "id" | "createdAt">) => {
+    const job: Job = { ...data, id: uid(), createdAt: new Date().toISOString() };
+    setJobs((prev) => [...prev, job]);
+    return job;
+  }, []);
+
+  const updateJob = useCallback((id: string, data: Partial<Job>) => {
+    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...data } : j)));
+  }, []);
+
+  const deleteJob = useCallback((id: string) => {
+    setJobs((prev) => prev.filter((j) => j.id !== id));
+  }, []);
+
+  const getJobsByUserId = useCallback((userId: string) =>
+    jobs.filter((j) => j.userId === userId), [jobs]);
+
   return (
     <AppContext.Provider value={{
-      currentUser, users, profiles, listings,
+      currentUser, users, profiles, listings, jobs,
       login, logout, register,
       createProfile, updateProfile, getProfileByUserId, getProfileById,
       addListing, updateListing, deleteListing, getListingsByUserId,
+      addJob, updateJob, deleteJob, getJobsByUserId,
     }}>
       {children}
     </AppContext.Provider>

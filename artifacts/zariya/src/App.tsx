@@ -10,6 +10,8 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Discover from "@/pages/Discover";
+import Jobs from "@/pages/Jobs";
+import AddEditJob from "@/pages/AddEditJob";
 import CreateProfile from "@/pages/CreateProfile";
 import ViewProfile from "@/pages/ViewProfile";
 import EditProfile from "@/pages/EditProfile";
@@ -36,6 +38,19 @@ function Router() {
       <Route path="/app/discover">
         <ProtectedRoute><Discover /></ProtectedRoute>
       </Route>
+
+      {/* Jobs */}
+      <Route path="/app/jobs">
+        <ProtectedRoute><Jobs /></ProtectedRoute>
+      </Route>
+      <Route path="/app/jobs/post">
+        <ProtectedRoute><AddEditJob /></ProtectedRoute>
+      </Route>
+      <Route path="/app/jobs/edit/:id">
+        <ProtectedRoute><AddEditJob /></ProtectedRoute>
+      </Route>
+
+      {/* Profiles */}
       <Route path="/app/profile/create">
         <ProtectedRoute><CreateProfile /></ProtectedRoute>
       </Route>
@@ -45,6 +60,8 @@ function Router() {
       <Route path="/app/profile/:id">
         <ProtectedRoute><ViewProfile /></ProtectedRoute>
       </Route>
+
+      {/* Listings */}
       <Route path="/app/listings">
         <ProtectedRoute><MyListings /></ProtectedRoute>
       </Route>

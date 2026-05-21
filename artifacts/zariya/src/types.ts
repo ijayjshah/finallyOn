@@ -53,9 +53,36 @@ export interface Listing {
   createdAt: string;
 }
 
+export interface Job {
+  id: string;
+  userId: string;
+  posterName: string;
+  /** 'opening' = employer wants to hire · 'seeker' = worker looking for a job */
+  listingType: 'opening' | 'seeker';
+  title: string;
+  category: string;
+  city: string;
+  area: string;
+  description: string;
+  salary: string;
+  employmentType: string;
+  experience: string;
+  contact: string;
+  active: boolean;
+  createdAt: string;
+}
+
 export const GUJARAT_CITIES = ['Surat', 'Ahmedabad', 'Vadodara', 'Navsari'];
 export const EXPANDING_CITIES = ['Rajkot', 'Gandhinagar', 'Bhavnagar'];
 export const ALL_CITIES = [...GUJARAT_CITIES, ...EXPANDING_CITIES];
+
+export const EMPLOYMENT_TYPES = [
+  'Full-time',
+  'Part-time',
+  'Contract',
+  'Daily Wage',
+  'Seasonal',
+];
 
 export const SERVICE_CATEGORIES = [
   'Electrician',

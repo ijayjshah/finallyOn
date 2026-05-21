@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LayoutDashboard, Search, User, ListChecks, LogOut, PlusCircle, ChevronDown } from "lucide-react";
+import { Menu, X, LayoutDashboard, Search, User, ListChecks, LogOut, PlusCircle, ChevronDown, Briefcase, Home } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
 const navLinks = [
   { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
   { label: "Discover", href: "/app/discover", icon: Search },
+  { label: "Jobs", href: "/app/jobs", icon: Briefcase },
   { label: "My Listings", href: "/app/listings", icon: ListChecks },
 ];
 
@@ -34,7 +35,7 @@ export default function AppNavbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-15 flex items-center justify-between gap-4" style={{ height: 60 }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between gap-4" style={{ height: 60 }}>
         {/* Logo */}
         <button
           onClick={() => handleNav("/app/dashboard")}
@@ -76,6 +77,16 @@ export default function AppNavbar() {
 
         {/* Desktop Right */}
         <div className="hidden md:flex items-center gap-2">
+          {/* Home link */}
+          <button
+            onClick={() => handleNav("/")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title="Go to homepage"
+          >
+            <Home className="w-4 h-4" />
+            <span className="hidden lg:inline">Home</span>
+          </button>
+
           <button
             onClick={() => handleNav(profile ? "/app/listings/add" : "/app/profile/create")}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/8 transition-colors"
@@ -84,7 +95,7 @@ export default function AppNavbar() {
             {profile ? "Add Listing" : "Create Profile"}
           </button>
 
-          {/* User menu */}
+          {/* User dropdown */}
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -113,12 +124,27 @@ export default function AppNavbar() {
                   </div>
                   <div className="p-1.5">
                     <button
+                      onClick={() => handleNav("/")}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
+                    >
+                      <Home className="w-4 h-4 text-muted-foreground" />
+                      Homepage
+                    </button>
+                    <button
                       onClick={() => handleNav(profile ? `/app/profile/${profile.id}` : "/app/profile/create")}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
                     >
                       <User className="w-4 h-4 text-muted-foreground" />
                       {profile ? "View Profile" : "Create Profile"}
                     </button>
+                    <button
+                      onClick={() => handleNav("/app/jobs/post")}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
+                    >
+                      <Briefcase className="w-4 h-4 text-muted-foreground" />
+                      Post a Job
+                    </button>
+                    <div className="my-1 border-t border-border" />
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-sm text-destructive text-left transition-colors"
@@ -164,13 +190,34 @@ export default function AppNavbar() {
                   {link.label}
                 </button>
               ))}
+
+              <div className="my-2 border-t border-border" />
+
+              {/* Home */}
+              <button
+                onClick={() => handleNav("/")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <Home className="w-4 h-4 text-muted-foreground" />
+                Go to Homepage
+              </button>
+
               <button
                 onClick={() => handleNav(profile ? "/app/listings/add" : "/app/profile/create")}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/8 transition-colors mt-2"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/8 transition-colors mt-1"
               >
                 <PlusCircle className="w-4 h-4" />
                 {profile ? "Add Listing" : "Create Profile"}
               </button>
+
+              <button
+                onClick={() => handleNav("/app/jobs/post")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <Briefcase className="w-4 h-4 text-muted-foreground" />
+                Post a Job
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
