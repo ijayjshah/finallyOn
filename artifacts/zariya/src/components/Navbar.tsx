@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { useLocation } from "wouter";
 
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
@@ -13,6 +14,7 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -66,27 +68,30 @@ export default function Navbar() {
               key={link.href}
               onClick={() => handleNavClick(link.href)}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer bg-transparent border-none outline-none"
-              data-testid={`nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
             >
               {link.label}
             </button>
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           <button
-            onClick={() => handleNavClick("#waitlist")}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-            data-testid="button-join-waitlist-nav"
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground hover:bg-muted transition-colors"
           >
-            Join Waitlist
+            Log In
+          </button>
+          <button
+            onClick={() => navigate("/register")}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            Get Started Free
           </button>
         </div>
 
         <button
           className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
-          data-testid="button-mobile-menu"
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -101,7 +106,7 @@ export default function Navbar() {
             transition={{ duration: 0.2 }}
             className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border overflow-hidden"
           >
-            <div className="px-6 py-5 flex flex-col gap-4">
+            <div className="px-6 py-5 flex flex-col gap-3">
               {navLinks.map((link) => (
                 <button
                   key={link.href}
@@ -111,12 +116,20 @@ export default function Navbar() {
                   {link.label}
                 </button>
               ))}
-              <button
-                onClick={() => handleNavClick("#waitlist")}
-                className="w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold mt-1 cursor-pointer"
-              >
-                Join Waitlist
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => { setMobileOpen(false); navigate("/login"); }}
+                  className="flex-1 py-2.5 rounded-lg border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => { setMobileOpen(false); navigate("/register"); }}
+                  className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+                >
+                  Get Started
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

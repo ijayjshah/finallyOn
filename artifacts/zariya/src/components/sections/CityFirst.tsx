@@ -2,15 +2,13 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 
 const cities = [
-  { name: "Delhi NCR", status: "live", top: "18%", left: "32%" },
-  { name: "Mumbai", status: "live", top: "52%", left: "22%" },
-  { name: "Bengaluru", status: "live", top: "68%", left: "34%" },
-  { name: "Pune", status: "live", top: "58%", left: "26%" },
-  { name: "Hyderabad", status: "coming", top: "60%", left: "42%" },
-  { name: "Chennai", status: "coming", top: "74%", left: "40%" },
-  { name: "Kolkata", status: "coming", top: "38%", left: "68%" },
-  { name: "Ahmedabad", status: "coming", top: "42%", left: "22%" },
-  { name: "Jaipur", status: "coming", top: "30%", left: "28%" },
+  { name: "Surat", status: "live", top: "52%", left: "32%", workers: "1,400+" },
+  { name: "Ahmedabad", status: "live", top: "30%", left: "28%", workers: "1,800+" },
+  { name: "Vadodara", status: "live", top: "42%", left: "38%", workers: "960+" },
+  { name: "Navsari", status: "live", top: "62%", left: "28%", workers: "520+" },
+  { name: "Rajkot", status: "coming", top: "28%", left: "14%", workers: "" },
+  { name: "Gandhinagar", status: "coming", top: "26%", left: "30%", workers: "" },
+  { name: "Bhavnagar", status: "coming", top: "48%", left: "20%", workers: "" },
 ];
 
 const reasons = [
@@ -20,11 +18,11 @@ const reasons = [
   },
   {
     title: "Trust built through proximity",
-    desc: "Local reviews, known areas, and shared neighbourhoods create a trust signal that national platforms can't replicate.",
+    desc: "Local reviews, known areas, and shared neighbourhoods in Gujarat create a trust signal no national platform can replicate.",
   },
   {
-    title: "Operational quality control",
-    desc: "Launching city by city lets us verify workers, respond to issues, and maintain service standards before expanding.",
+    title: "Quality control city by city",
+    desc: "Launching in Surat, Ahmedabad, Vadodara, and Navsari first lets us verify workers, respond to issues, and maintain standards.",
   },
   {
     title: "Repeat demand compounds",
@@ -44,14 +42,17 @@ export default function CityFirst() {
             viewport={{ once: true }}
             transition={{ duration: 0.65 }}
           >
-            <p className="text-xs uppercase tracking-widest font-semibold text-background/40 mb-4">City-First Model</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-background leading-tight mb-6">
-              We launch city by city.
-              <span className="text-primary"> Intentionally.</span>
+            <p className="text-xs uppercase tracking-widest font-semibold text-background/40 mb-4">Launching in Gujarat</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-background leading-tight mb-3">
+              Starting in Gujarat.
+              <span className="text-primary"> Growing with intent.</span>
             </h2>
+            <p className="text-base text-background/50 font-medium mb-2">
+              Navsari · Surat · Ahmedabad · Vadodara — and expanding.
+            </p>
             <p className="text-lg text-background/60 leading-relaxed mb-10">
-              Foundwork doesn't try to be everywhere at once. We go deep in one city before moving to the next —
-              building real density, real trust, and real utility before we scale.
+              Foundwork doesn't try to be everywhere at once. We go deep in Gujarat first —
+              building real density, real trust, and real utility before we scale to the rest of India.
             </p>
 
             <div className="space-y-6">
@@ -63,7 +64,6 @@ export default function CityFirst() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.45 }}
                   className="flex gap-4"
-                  data-testid={`city-reason-${i}`}
                 >
                   <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
@@ -75,7 +75,7 @@ export default function CityFirst() {
             </div>
           </motion.div>
 
-          {/* Right — abstract city map */}
+          {/* Right — Gujarat map visual */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -84,7 +84,6 @@ export default function CityFirst() {
             className="relative"
           >
             <div className="relative w-full aspect-square max-w-md mx-auto rounded-3xl border border-background/10 bg-background/5 overflow-hidden">
-              {/* Grid lines */}
               <div
                 className="absolute inset-0 opacity-[0.06]"
                 style={{
@@ -103,7 +102,6 @@ export default function CityFirst() {
                   transition={{ delay: 0.3 + i * 0.12, duration: 0.4 }}
                   className="absolute flex flex-col items-center"
                   style={{ top: city.top, left: city.left, transform: "translate(-50%, -50%)" }}
-                  data-testid={`map-city-${city.name.toLowerCase().replace(/\s/g, "-")}`}
                 >
                   {city.status === "live" ? (
                     <>
@@ -111,7 +109,12 @@ export default function CityFirst() {
                         <div className="w-4 h-4 rounded-full bg-primary shadow-lg shadow-primary/50" />
                         <div className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
                       </div>
-                      <span className="text-[9px] font-bold text-background mt-1 whitespace-nowrap">{city.name}</span>
+                      <div className="text-center mt-1">
+                        <div className="text-[9px] font-bold text-background whitespace-nowrap">{city.name}</div>
+                        {city.workers && (
+                          <div className="text-[8px] text-primary whitespace-nowrap">{city.workers}</div>
+                        )}
+                      </div>
                     </>
                   ) : (
                     <>
@@ -126,16 +129,28 @@ export default function CityFirst() {
               <div className="absolute bottom-4 left-4 flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                  <span className="text-[10px] text-background/60 font-medium">Live now</span>
+                  <span className="text-[10px] text-background/60 font-medium">Live in Gujarat</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-background/20 border border-background/30" />
-                  <span className="text-[10px] text-background/40 font-medium">Coming soon</span>
+                  <span className="text-[10px] text-background/40 font-medium">Expanding soon</span>
                 </div>
               </div>
 
-              {/* India label */}
-              <div className="absolute top-4 right-4 text-[10px] text-background/20 font-semibold tracking-widest uppercase">India</div>
+              <div className="absolute top-4 right-4 text-[10px] text-background/20 font-semibold tracking-widest uppercase">Gujarat</div>
+            </div>
+
+            {/* City cards below */}
+            <div className="grid grid-cols-2 gap-3 mt-5">
+              {cities.filter((c) => c.status === "live").map((city) => (
+                <div key={city.name} className="flex items-center gap-3 p-3 rounded-xl bg-background/5 border border-background/10">
+                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold text-background">{city.name}</div>
+                    <div className="text-[10px] text-primary">{city.workers} workers</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
