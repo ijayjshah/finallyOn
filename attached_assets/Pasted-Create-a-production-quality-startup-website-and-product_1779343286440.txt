@@ -1,0 +1,374 @@
+Create a production-quality startup website and product experience for a venture-scale Indian startup called “LocalGrid”.
+
+CORE IDEA
+LocalGrid is a hyperlocal economic platform for India’s informal workers, service providers, freelancers, and small sellers.
+It helps anyone:
+- create a digital identity
+- get discovered locally
+- show a professional portfolio made by the platform
+- receive inquiries and bookings
+- manage work and orders
+- sell products through a mini-store
+- build trust through reviews, verification, and activity history
+
+IMPORTANT PRODUCT POSITIONING
+Do NOT position this as just:
+- a local marketplace
+- a classifieds app
+- a simple ecommerce site
+- a freelancer listing site
+
+Position it as:
+“economic participation infrastructure for local workers and micro-businesses.”
+
+TARGET USERS
+1. Service providers:
+- electricians
+- plumbers
+- tutors
+- beauticians
+- mehendi artists
+- tailors
+- carpenters
+- repair workers
+- photographers
+- freelancers
+- home-based professionals
+
+2. Small sellers:
+- homemade food businesses
+- clothing resellers
+- artisans
+- handicraft sellers
+- local brands
+- rural product sellers
+- small merchants
+
+3. Demand side users:
+- customers looking for trusted local services
+- customers looking for nearby products and sellers
+
+MOST IMPORTANT REQUIREMENT
+Every service provider must get a beautiful portfolio page generated and styled by LocalGrid itself.
+The worker should not need design knowledge.
+The website must clearly show that LocalGrid automatically creates:
+- profile
+- portfolio
+- service cards
+- work gallery
+- reviews section
+- trust badges
+- booking/contact modules
+
+This portfolio should feel premium, modern, and mobile-first.
+Think of it as:
+“your business profile + mini portfolio website + local visibility page”
+all created automatically inside LocalGrid.
+
+WEBSITE GOAL
+Build a complete startup website that looks investor-ready, premium, minimal, modern, and trustworthy.
+It should be good enough to present to:
+- early users
+- angel investors
+- seed funds
+- strategic partners
+
+DESIGN DIRECTION
+The website must feel:
+- minimalistic
+- simple
+- premium
+- modern
+- new-age technology
+- mobile-first
+- clean and structured
+- multilingual-ready
+- India-friendly but globally polished
+
+AVOID
+- clutter
+- old Indian marketplace look
+- government portal feel
+- cheap ecommerce visuals
+- crowded cards everywhere
+- loud colors
+- generic template style
+- too many gradients
+- excessive text blocks
+- outdated stock image feeling
+
+VISUAL STYLE
+Use a restrained, elegant, startup-grade interface.
+Design language should feel like:
+- a modern SaaS product
+- a thoughtful marketplace OS
+- a trust-first local commerce brand
+
+Use:
+- clean grids
+- lots of whitespace
+- soft depth
+- subtle borders
+- modern typography
+- smooth motion
+- tasteful accent color
+- strong mobile responsiveness
+- elegant scroll animations
+- premium section transitions
+
+ANIMATION DIRECTION
+Animations should feel related to the brand idea of a living local network.
+Use subtle brand-linked motion such as:
+- connected nodes
+- flowing lines
+- modular grid reveals
+- cards fading and sliding into place
+- map or locality pulse effects
+- trust badges animating in gently
+- portfolio previews assembling smoothly
+- marketplace ecosystem lines connecting users, workers, and sellers
+
+Animation must be:
+- smooth
+- premium
+- light
+- not distracting
+- performance-friendly
+- reduced-motion accessible
+
+BRAND STORY
+LocalGrid is building the digital identity and operating layer for India’s local economy.
+It turns informal work into discoverable, trusted, structured digital business presence.
+
+MAIN MESSAGES
+The website must communicate these clearly:
+- Start your service business online in minutes
+- Get your own professional portfolio automatically
+- Be discovered by nearby customers
+- Manage bookings, orders, and work history
+- Sell products and services in one place
+- Build trust through verification, ratings, and proof of work
+- Grow locally first, then scale city by city
+
+PRIMARY CTA
+“Join the waitlist”
+Secondary CTA:
+“See how LocalGrid works”
+
+SITE STRUCTURE
+Create a full website with the following sections:
+
+1. HERO SECTION
+- Strong headline
+- Clear subheadline
+- CTA buttons
+- Product visual or animated ecosystem mockup
+- show service + commerce + portfolio in one frame
+
+Suggested headline direction:
+“Build your local business identity. Get discovered. Grow income.”
+or
+“The growth network for local workers and small sellers.”
+
+2. TRUST / SOCIAL PROOF STRIP
+- categories of workers and sellers
+- trust message
+- optional pilot-city framing
+- examples like tailor, tutor, electrician, mehendi artist, food seller
+
+3. PROBLEM SECTION
+Show current pain points:
+- no digital identity
+- no structured portfolio
+- scattered WhatsApp inquiries
+- no trust layer
+- no easy local discovery
+- hard to manage repeat customers
+- small sellers and workers remain invisible online
+
+4. SOLUTION SECTION
+Show how LocalGrid solves this through:
+- digital identity
+- auto-generated portfolio
+- local discovery
+- bookings and inquiries
+- mini storefront
+- trust and reviews
+- work/order management
+
+5. PORTFOLIO ENGINE SECTION
+This is a major section.
+Clearly show that LocalGrid designs portfolio pages for service providers automatically.
+Include feature blocks such as:
+- beautiful ready-made profile layouts
+- image gallery for past work
+- ratings and reviews
+- verification badges
+- service list with pricing or inquiry
+- local service area map
+- one-tap contact and booking
+- mobile-first public profile page
+- no coding, no website building needed
+
+This section should visually showcase sample portfolio pages for:
+- a tailor
+- a mehendi artist
+- a tutor
+- an electrician
+
+6. COMMERCE SECTION
+Explain seller features:
+- mini storefront
+- product catalog
+- inventory-lite
+- inquiry/order workflow
+- local delivery integration
+- analytics
+- paid boosts
+
+7. HOW IT WORKS
+Simple 3-step or 4-step flow:
+- create profile
+- upload work or products
+- get discovered locally
+- manage customers and grow
+
+8. CITY-FIRST MODEL
+Explain that LocalGrid launches city by city.
+Show why that improves:
+- trust
+- quality
+- density
+- repeat demand
+- operational efficiency
+
+9. WHO IT IS FOR
+Separate cards or panels for:
+- service workers
+- micro sellers
+- local brands
+- home businesses
+- customers
+
+10. BUSINESS MODEL / PLATFORM SCALE
+Communicate future scale without overcomplicating.
+Show current and future monetization:
+Now:
+- commerce tools
+- seller subscriptions
+- promoted listings
+- transaction rails
+Soon:
+- logistics
+- local ads
+- payments
+Later:
+- financing
+- insurance
+- supplier access
+- business growth tools
+
+11. INVESTOR / CATEGORY POSITIONING SECTION
+Present the category clearly:
+“LocalGrid is not a marketplace app.
+It is digital infrastructure for local economic participation.”
+
+12. APP / PRODUCT UI SHOWCASE
+Include realistic product screens for:
+- worker onboarding
+- auto-generated portfolio
+- booking dashboard
+- seller mini-store
+- local search/discovery
+- reviews and trust badge interface
+
+13. FAQ
+Questions like:
+- Is it free for service providers?
+- Do I need a website?
+- Can I sell products too?
+- Can I use it in my city?
+- How do customers find me?
+- Do I need technical knowledge?
+
+14. FINAL CTA
+Simple strong close:
+“Bring your local business online with LocalGrid.”
+
+MANDATORY PRODUCT FEATURES TO REPRESENT
+For service providers:
+- free profile
+- portfolio generated by LocalGrid
+- gallery
+- reviews
+- trust badges
+- local search visibility
+- contact/booking
+- customer history
+- schedule basics
+
+For sellers:
+- mini-store
+- product listing
+- inquiry/order system
+- low-cost subscription layer
+- local delivery support
+- promoted visibility
+
+COPY STYLE
+Use clear, specific, investor-smart copy.
+Avoid jargon-heavy startup fluff.
+Avoid generic lines like:
+- empowering your future
+- unlocking possibilities
+- all-in-one solution
+
+The copy should sound:
+- sharp
+- simple
+- credible
+- category-defining
+- trustworthy
+
+TECH REQUIREMENTS
+Build as a premium responsive website.
+Use:
+- modern semantic HTML
+- elegant CSS or Tailwind
+- subtle GSAP / Motion / modern CSS-based animations
+- dark/light compatibility if suitable
+- strong mobile-first layout
+- fast loading
+- accessible interactions
+- polished hover and scroll effects
+
+DESIGN SYSTEM
+Create a cohesive system with:
+- minimalist neutral base
+- one restrained brand accent
+- premium typography pairing
+- soft shadow system
+- subtle border hierarchy
+- consistent spacing rhythm
+- rounded but not bubbly UI
+
+PORTFOLIO SUBSYSTEM REQUIREMENT
+Inside the website, include a dedicated visual explanation of how LocalGrid portfolio pages are generated.
+These portfolio pages should feel like actual mini-sites generated by the product.
+Include sample modules:
+- hero with provider name and category
+- work gallery
+- about/services
+- reviews
+- city/locality coverage
+- contact/book-now CTA
+- trust badge row
+
+Make these sample portfolio pages a signature differentiator of the site.
+
+DELIVERABLE
+Create the full website with polished copy, modern design, meaningful motion, and complete section structure.
+The final output should feel like a real seed-stage startup website that could impress users and investors.
+
+FINAL TONE
+Minimal, premium, structured, trustworthy, modern Indian startup, local economy infrastructure, design-forward but simple.
