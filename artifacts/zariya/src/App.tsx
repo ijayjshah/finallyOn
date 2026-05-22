@@ -5,9 +5,18 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
+
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import HowItWorksPage from "@/pages/HowItWorksPage";
+import ServicesPage from "@/pages/ServicesPage";
+import ProductsPage from "@/pages/ProductsPage";
+import PortfolioPage from "@/pages/PortfolioPage";
+import DistrictsPage from "@/pages/DistrictsPage";
+import TrustPage from "@/pages/TrustPage";
+import ContactPage from "@/pages/ContactPage";
+
 import Dashboard from "@/pages/Dashboard";
 import Discover from "@/pages/Discover";
 import Jobs from "@/pages/Jobs";
@@ -23,15 +32,24 @@ const queryClient = new QueryClient();
 function Router() {
   return (
     <Switch>
-      {/* Public */}
+      {/* ── Marketing pages (public) ─────────────────── */}
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/how-it-works" component={HowItWorksPage} />
+      <Route path="/services" component={ServicesPage} />
+      <Route path="/products" component={ProductsPage} />
+      <Route path="/portfolio" component={PortfolioPage} />
+      <Route path="/districts" component={DistrictsPage} />
+      <Route path="/trust" component={TrustPage} />
+      <Route path="/contact" component={ContactPage} />
 
-      {/* Protected app routes */}
+      {/* ── App shell ────────────────────────────────── */}
       <Route path="/app">
         <Redirect to="/app/dashboard" />
       </Route>
+
+      {/* Dashboard & Discover */}
       <Route path="/app/dashboard">
         <ProtectedRoute><Dashboard /></ProtectedRoute>
       </Route>

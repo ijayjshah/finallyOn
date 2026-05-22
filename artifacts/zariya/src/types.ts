@@ -1,4 +1,4 @@
-export type UserType = 'worker' | 'customer';
+export type UserType = 'worker' | 'customer' | 'business';
 
 export interface User {
   id: string;
@@ -6,8 +6,10 @@ export interface User {
   email: string;
   password: string;
   phone: string;
+  whatsappNumber: string;
   type: UserType;
   city: string;
+  district: string;
   createdAt: string;
 }
 
@@ -25,6 +27,7 @@ export interface ServiceProfile {
   category: string;
   city: string;
   area: string;
+  district: string;
   description: string;
   photos: string[];
   services: ServiceItem[];
@@ -32,9 +35,15 @@ export interface ServiceProfile {
   reviewCount: number;
   experience: string;
   phone: string;
+  whatsappNumber: string;
+  mapUrl: string;
   verified: boolean;
   available: boolean;
   tags: string[];
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  resumeUrl?: string;
+  deliveryAvailable?: boolean;
+  pickupAvailable?: boolean;
   createdAt: string;
 }
 
@@ -43,13 +52,19 @@ export interface Listing {
   userId: string;
   title: string;
   category: string;
+  subCategory: string;
   description: string;
   price: string;
   city: string;
   area: string;
+  district: string;
   photos: string[];
   type: 'service' | 'product';
+  deliveryAvailable: boolean;
+  pickupAvailable: boolean;
+  whatsappNumber: string;
   active: boolean;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
   createdAt: string;
 }
 
@@ -57,57 +72,63 @@ export interface Job {
   id: string;
   userId: string;
   posterName: string;
-  /** 'opening' = employer wants to hire · 'seeker' = worker looking for a job */
   listingType: 'opening' | 'seeker';
   title: string;
   category: string;
   city: string;
   area: string;
+  district: string;
   description: string;
   salary: string;
   employmentType: string;
   experience: string;
   contact: string;
+  whatsappNumber: string;
+  resumeRequired?: boolean;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
   active: boolean;
   createdAt: string;
 }
 
-export const GUJARAT_CITIES = ['Surat', 'Ahmedabad', 'Vadodara', 'Navsari'];
+export const DISTRICTS = ['Navsari'];
+export const COMING_SOON_DISTRICTS = ['Surat', 'Valsad', 'Vapi'];
+export const ALL_DISTRICTS = [...DISTRICTS, ...COMING_SOON_DISTRICTS];
+
+export const NAVSARI_AREAS = [
+  'Navsari City', 'Jalalpore', 'Gandevi', 'Chikhli', 'Vansda',
+  'Bilimora', 'Vijalpore', 'Dungri', 'Mahuva', 'Vejalpore',
+  'Sanja', 'Khergam', 'Aat', 'Bapod', 'Variav',
+];
+
+export const GUJARAT_CITIES = ['Navsari', 'Surat', 'Ahmedabad', 'Vadodara'];
 export const EXPANDING_CITIES = ['Rajkot', 'Gandhinagar', 'Bhavnagar'];
 export const ALL_CITIES = [...GUJARAT_CITIES, ...EXPANDING_CITIES];
 
 export const EMPLOYMENT_TYPES = [
-  'Full-time',
-  'Part-time',
-  'Contract',
-  'Daily Wage',
-  'Seasonal',
+  'Full-time', 'Part-time', 'Contract', 'Daily Wage', 'Seasonal',
 ];
 
 export const SERVICE_CATEGORIES = [
-  'Electrician',
-  'Plumber',
-  'Carpenter',
-  'Painter',
-  'Tailor / Dress Maker',
-  'Beautician',
-  'Mehendi Artist',
-  'Home Chef / Tiffin Service',
-  'Baker / Confectioner',
-  'Home Tutor',
-  'AC / Refrigerator Repair',
-  'Mobile / Electronics Repair',
-  'Interior Designer',
-  'Event Planner',
-  'Photographer / Videographer',
-  'Yoga / Fitness Trainer',
-  'Cleaning Service',
-  'Pest Control',
-  'Vehicle Driver',
-  'Security Guard',
-  'Gardener',
-  'Catering Service',
-  'Massage Therapist',
-  'Computer Trainer',
-  'Astrologer / Vastu Consultant',
+  'Electrician', 'Plumber', 'Carpenter', 'Painter',
+  'Tailor / Dress Maker', 'Beautician', 'Mehendi Artist',
+  'Home Chef / Tiffin Service', 'Baker / Confectioner',
+  'Home Tutor', 'AC / Refrigerator Repair', 'Mobile / Electronics Repair',
+  'Interior Designer', 'Event Planner', 'Photographer / Videographer',
+  'Yoga / Fitness Trainer', 'Cleaning Service', 'Pest Control',
+  'Vehicle Driver', 'Security Guard', 'Gardener', 'Catering Service',
+  'Massage Therapist', 'Computer Trainer', 'Astrologer / Vastu Consultant',
+  'Jewellery Shop', 'Clothing & Garments', 'Electronics Store',
+  'Grocery / Kirana', 'Pharmacy', 'Hardware Store', 'Furniture Shop',
 ];
+
+export const PRODUCT_MAX = 20;
+
+export const BRAND = {
+  name: 'FinallyOn',
+  tagline: 'Finally, local businesses online. Properly.',
+  district: 'Navsari',
+  email: 'hello@finallyon.in',
+  support: 'support@finallyon.in',
+  website: 'finallyon.in',
+  digitalSupport: 'attachtotech.xyz',
+} as const;

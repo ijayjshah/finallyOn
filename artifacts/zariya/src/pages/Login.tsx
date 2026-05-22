@@ -3,6 +3,22 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { BRAND } from "@/types";
+
+const Logo = () => (
+  <div className="flex items-center gap-2 justify-center mb-2">
+    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <circle cx="5" cy="5" r="2.5" fill="white" />
+        <circle cx="15" cy="5" r="2.5" fill="white" opacity="0.6" />
+        <circle cx="5" cy="15" r="2.5" fill="white" opacity="0.6" />
+        <circle cx="15" cy="15" r="2.5" fill="white" />
+        <circle cx="10" cy="10" r="2" fill="white" opacity="0.85" />
+      </svg>
+    </div>
+    <span className="font-extrabold text-xl text-foreground">{BRAND.name}</span>
+  </div>
+);
 
 export default function Login() {
   const [, navigate] = useLocation();
@@ -27,88 +43,67 @@ export default function Login() {
     }
   };
 
-  const fillDemo = () => {
-    setEmail("demo@foundwork.in");
-    setPassword("demo123");
-  };
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Top bar */}
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-sm"
+      >
+        {/* Back */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Foundwork
+          Back to {BRAND.name}
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
-              <circle cx="4" cy="4" r="2" fill="white" />
-              <circle cx="14" cy="4" r="2" fill="white" opacity="0.65" />
-              <circle cx="4" cy="14" r="2" fill="white" opacity="0.65" />
-              <circle cx="14" cy="14" r="2" fill="white" />
-              <circle cx="9" cy="9" r="1.5" fill="white" opacity="0.85" />
-            </svg>
-          </div>
-          <span className="font-bold text-base text-foreground">Foundwork</span>
-        </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold text-foreground mb-2">Welcome back</h1>
-            <p className="text-muted-foreground text-sm">Sign in to your Foundwork account</p>
-          </div>
+        <div className="p-8 rounded-2xl border border-border bg-card shadow-sm">
+          <Logo />
+          <h1 className="text-xl font-extrabold text-foreground text-center mb-1">Welcome back</h1>
+          <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your {BRAND.name} account</p>
 
           {/* Demo hint */}
-          <div className="mb-6 p-4 rounded-xl bg-primary/8 border border-primary/20 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-foreground">Try the demo account</p>
-              <p className="text-xs text-muted-foreground">demo@foundwork.in · demo123</p>
+          <div className="mb-5 p-3 rounded-xl bg-primary/8 border border-primary/15">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-primary mb-0.5">Try the demo account</div>
+                <div className="text-xs text-muted-foreground">demo@finallyon.in · demo123</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setEmail("demo@finallyon.in"); setPassword("demo123"); }}
+                className="text-xs font-bold text-primary-foreground bg-primary px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Fill
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={fillDemo}
-              className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity"
-            >
-              Fill
-            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-foreground mb-1.5 block">Email address</label>
+              <label className="text-sm font-semibold text-foreground block mb-1.5">Email address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                data-testid="input-login-email"
+                placeholder="you@example.com"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
-
             <div>
-              <label className="text-sm font-semibold text-foreground mb-1.5 block">Password</label>
+              <label className="text-sm font-semibold text-foreground block mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
                   required
-                  className="w-full px-4 py-3 pr-11 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  data-testid="input-login-password"
+                  placeholder="Your password"
+                  className="w-full px-4 py-3 pr-11 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 <button
                   type="button"
@@ -121,20 +116,15 @@ export default function Login() {
             </div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive font-medium"
-              >
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
-              data-testid="button-login-submit"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-60"
             >
               {loading ? (
                 <span className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
@@ -144,17 +134,14 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
+          <p className="text-center text-sm text-muted-foreground mt-5">
             Don't have an account?{" "}
-            <button
-              onClick={() => navigate("/register")}
-              className="text-primary font-semibold hover:underline"
-            >
+            <button onClick={() => navigate("/register")} className="text-primary font-semibold hover:underline">
               Create one free
             </button>
           </p>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

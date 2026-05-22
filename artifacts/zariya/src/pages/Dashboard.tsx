@@ -1,8 +1,12 @@
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { User, ListChecks, Search, PlusCircle, ArrowRight, Star, MapPin, CheckCircle2, Zap } from "lucide-react";
+import {
+  User, ListChecks, Search, PlusCircle, ArrowRight, Star,
+  MapPin, CheckCircle2, Zap, Clock, Shield, MessageCircle, Briefcase,
+} from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { BRAND } from "@/types";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -13,23 +17,32 @@ export default function Dashboard() {
   const myProfile = getProfileByUserId(currentUser.id);
   const myListings = getListingsByUserId(currentUser.id);
   const activeListings = myListings.filter((l) => l.active);
-  const recentProfiles = profiles.slice(0, 3);
+  const pendingListings = myListings.filter((l) => l.approvalStatus === "pending");
+  const recentProfiles = profiles.filter((p) => p.approvalStatus === "approved").slice(0, 3);
+
+  const profileApproval = myProfile?.approvalStatus ?? null;
 
   const stats = [
     {
       label: "Profile Status",
-      value: myProfile ? "Live" : "Not Created",
+      value: myProfile
+        ? profileApproval === "approved" ? "Live ✓" : profileApproval === "pending" ? "Under Review" : "Rejected"
+        : "Not Created",
       sub: myProfile ? myProfile.category : "Set up your profile",
       icon: User,
-      color: myProfile ? "text-emerald-600" : "text-amber-600",
-      bg: myProfile ? "bg-emerald-50" : "bg-amber-50",
+      color: myProfile
+        ? profileApproval === "approved" ? "text-emerald-600" : profileApproval === "pending" ? "text-amber-600" : "text-destructive"
+        : "text-amber-600",
+      bg: myProfile
+        ? profileApproval === "approved" ? "bg-emerald-50" : profileApproval === "pending" ? "bg-amber-50" : "bg-destructive/10"
+        : "bg-amber-50",
       action: myProfile ? `/app/profile/${myProfile.id}` : "/app/profile/create",
       actionLabel: myProfile ? "View" : "Create",
     },
     {
       label: "Active Listings",
       value: String(activeListings.length),
-      sub: `${myListings.length} total listings`,
+      sub: `${myListings.length} total · ${pendingListings.length} pending review`,
       icon: ListChecks,
       color: "text-primary",
       bg: "bg-primary/10",
@@ -37,9 +50,9 @@ export default function Dashboard() {
       actionLabel: "Manage",
     },
     {
-      label: "City",
-      value: currentUser.city,
-      sub: "Gujarat · Foundwork Active",
+      label: "District",
+      value: currentUser.district || currentUser.city || "Navsari",
+      sub: `Gujarat · ${BRAND.name} Active`,
       icon: MapPin,
       color: "text-violet-600",
       bg: "bg-violet-50",
@@ -51,22 +64,61 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
         {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="mb-8"
+          className="mb-6"
         >
           <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">
             Welcome back, {currentUser.name.split(" ")[0]} 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {currentUser.type === "worker"
-              ? "Manage your profile, listings, and discover the local network."
-              : "Discover service providers and manage your activity."}
+          <p className="text-muted-foreground mt-1 text-sm">
+            {currentUser.district || "Navsari"}, Gujarat · {BRAND.name} Dashboard
           </p>
         </motion.div>
+
+        {/* Approval alert */}
+        {profileApproval === "pending" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 flex items-start gap-3"
+          >
+            <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-bold text-sm text-amber-800">Your profile is under admin review</div>
+              <p className="text-xs text-amber-700 mt-0.5">
+                We're verifying your Google Maps location, photos, and details. This usually takes within 24 hours.
+                Your profile is not yet visible to customers.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {profileApproval === "rejected" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-xl border border-destructive/30 bg-destructive/8 flex items-start gap-3"
+          >
+            <Shield className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-bold text-sm text-destructive">Your profile was not approved</div>
+              <p className="text-xs text-destructive/80 mt-0.5">
+                Check your profile for the reason and make corrections. Then resubmit for review.
+              </p>
+              <button
+                onClick={() => navigate("/app/profile/edit")}
+                className="mt-2 text-xs font-bold text-destructive underline"
+              >
+                Edit & Resubmit →
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -98,7 +150,7 @@ export default function Dashboard() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Quick Actions */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
             <motion.div
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
@@ -107,7 +159,7 @@ export default function Dashboard() {
             >
               <h2 className="font-bold text-base text-foreground mb-4">Quick Actions</h2>
               <div className="space-y-2">
-                {currentUser.type === "worker" && !myProfile && (
+                {!myProfile && (
                   <button
                     onClick={() => navigate("/app/profile/create")}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
@@ -146,6 +198,14 @@ export default function Dashboard() {
                   <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
                 </button>
                 <button
+                  onClick={() => navigate("/app/jobs")}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:bg-muted text-sm font-medium transition-colors"
+                >
+                  <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  Jobs Board
+                  <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
+                </button>
+                <button
                   onClick={() => navigate("/app/discover")}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:bg-muted text-sm font-medium transition-colors"
                 >
@@ -153,50 +213,46 @@ export default function Dashboard() {
                   Discover Services
                   <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
                 </button>
-                <button
-                  onClick={() => navigate("/app/listings")}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:bg-muted text-sm font-medium transition-colors"
-                >
-                  <ListChecks className="w-4 h-4 text-muted-foreground" />
-                  My Listings
-                  <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
-                </button>
               </div>
             </motion.div>
 
-            {/* Profile completeness (if worker) */}
-            {currentUser.type === "worker" && (
-              <motion.div
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.45 }}
-                className="mt-4 p-5 rounded-2xl border border-border bg-card"
-              >
-                <h2 className="font-bold text-base text-foreground mb-3">Setup Checklist</h2>
-                <div className="space-y-2.5">
-                  {[
-                    { label: "Account created", done: true },
-                    { label: "Profile created", done: !!myProfile },
-                    { label: "Photos uploaded", done: !!myProfile && myProfile.photos.length > 0 },
-                    { label: "Services added", done: !!myProfile && myProfile.services.length > 0 },
-                    { label: "First listing added", done: myListings.length > 0 },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-2.5 text-sm">
-                      <CheckCircle2
-                        className={`w-4 h-4 flex-shrink-0 ${item.done ? "text-emerald-500" : "text-muted-foreground/30"}`}
-                      />
-                      <span className={item.done ? "text-foreground font-medium" : "text-muted-foreground"}>
-                        {item.label}
-                      </span>
-                    </div>
-                  ))}
+            {/* Setup checklist */}
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.45 }}
+              className="p-5 rounded-2xl border border-border bg-card"
+            >
+              <h2 className="font-bold text-base text-foreground mb-3">Setup Checklist</h2>
+              <div className="space-y-2.5">
+                {[
+                  { label: "Account created", done: true },
+                  { label: "Profile created", done: !!myProfile },
+                  { label: "WhatsApp number added", done: !!myProfile?.whatsappNumber || !!currentUser.whatsappNumber },
+                  { label: "Google Maps location added", done: !!myProfile?.mapUrl },
+                  { label: "Photos uploaded", done: !!myProfile && myProfile.photos.length > 0 },
+                  { label: "Services/products added", done: !!myProfile && myProfile.services.length > 0 },
+                  { label: "Admin approved", done: profileApproval === "approved" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2.5 text-sm">
+                    <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${item.done ? "text-emerald-500" : "text-muted-foreground/30"}`} />
+                    <span className={item.done ? "text-foreground font-medium" : "text-muted-foreground"}>
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {!myProfile?.mapUrl && myProfile && (
+                <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700">
+                  <strong>Required:</strong> Add your Google Maps location to complete your profile.
                 </div>
-              </motion.div>
-            )}
+              )}
+            </motion.div>
           </div>
 
-          {/* Recent Profiles in your city */}
-          <div className="lg:col-span-2">
+          {/* Right column */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Nearby approved providers */}
             <motion.div
               initial={{ opacity: 0, x: 16 }}
               animate={{ opacity: 1, x: 0 }}
@@ -204,7 +260,7 @@ export default function Dashboard() {
               className="p-5 rounded-2xl border border-border bg-card"
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-base text-foreground">Nearby Service Providers</h2>
+                <h2 className="font-bold text-base text-foreground">Verified Providers in Navsari</h2>
                 <button
                   onClick={() => navigate("/app/discover")}
                   className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
@@ -213,6 +269,9 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className="space-y-3">
+                {recentProfiles.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">No approved profiles yet.</p>
+                )}
                 {recentProfiles.map((profile) => (
                   <button
                     key={profile.id}
@@ -223,15 +282,17 @@ export default function Dashboard() {
                       {profile.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-sm text-foreground">{profile.name}</div>
-                      <div className="text-xs text-muted-foreground">{profile.category}</div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-foreground">{profile.name}</span>
+                        {profile.mapUrl && <MapPin className="w-3 h-3 text-emerald-500" />}
+                        {profile.whatsappNumber && <MessageCircle className="w-3 h-3 text-[#25D366]" />}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{profile.category} · {profile.area}, Navsari</div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex items-center gap-0.5">
                           <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                           <span className="text-xs font-semibold text-foreground">{profile.rating}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">·</span>
-                        <span className="text-xs text-muted-foreground">{profile.city}</span>
                       </div>
                     </div>
                     {profile.verified && (
@@ -244,30 +305,44 @@ export default function Dashboard() {
               </div>
             </motion.div>
 
-            {/* My recent listings */}
+            {/* My listings */}
             {myListings.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: 16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35, duration: 0.45 }}
-                className="mt-4 p-5 rounded-2xl border border-border bg-card"
+                className="p-5 rounded-2xl border border-border bg-card"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-base text-foreground">My Recent Listings</h2>
+                  <h2 className="font-bold text-base text-foreground">My Listings</h2>
                   <button onClick={() => navigate("/app/listings")} className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5">
                     Manage <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {myListings.slice(0, 3).map((listing) => (
+                  {myListings.slice(0, 4).map((listing) => (
                     <div key={listing.id} className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-foreground truncate">{listing.title}</div>
-                        <div className="text-xs text-muted-foreground">{listing.category} · {listing.city} · {listing.price}</div>
+                        <div className="text-xs text-muted-foreground">{listing.category} · {listing.area}, Navsari · {listing.price}</div>
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${listing.active ? "bg-emerald-50 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                        {listing.active ? "Active" : "Paused"}
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {listing.approvalStatus === "pending" && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-600 flex items-center gap-0.5">
+                            <Clock className="w-3 h-3" /> Pending
+                          </span>
+                        )}
+                        {listing.approvalStatus === "approved" && listing.active && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">
+                            Live
+                          </span>
+                        )}
+                        {listing.approvalStatus === "rejected" && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-destructive/10 text-destructive">
+                            Rejected
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LayoutDashboard, Search, User, ListChecks, LogOut, PlusCircle, ChevronDown, Briefcase, Home } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { BRAND } from "@/types";
 
 const navLinks = [
   { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
@@ -10,6 +11,21 @@ const navLinks = [
   { label: "Jobs", href: "/app/jobs", icon: Briefcase },
   { label: "My Listings", href: "/app/listings", icon: ListChecks },
 ];
+
+const Logo = () => (
+  <div className="flex items-center gap-2">
+    <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+        <circle cx="5" cy="5" r="2.5" fill="white" />
+        <circle cx="15" cy="5" r="2.5" fill="white" opacity="0.6" />
+        <circle cx="5" cy="15" r="2.5" fill="white" opacity="0.6" />
+        <circle cx="15" cy="15" r="2.5" fill="white" />
+        <circle cx="10" cy="10" r="2" fill="white" opacity="0.85" />
+      </svg>
+    </div>
+    <span className="font-bold text-base tracking-tight text-foreground">{BRAND.name}</span>
+  </div>
+);
 
 export default function AppNavbar() {
   const [, navigate] = useLocation();
@@ -36,37 +52,17 @@ export default function AppNavbar() {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between gap-4" style={{ height: 60 }}>
-        {/* Logo */}
-        <button
-          onClick={() => handleNav("/app/dashboard")}
-          className="flex items-center gap-2 flex-shrink-0"
-        >
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
-              <circle cx="4" cy="4" r="2" fill="white" />
-              <circle cx="14" cy="4" r="2" fill="white" opacity="0.65" />
-              <circle cx="4" cy="14" r="2" fill="white" opacity="0.65" />
-              <circle cx="14" cy="14" r="2" fill="white" />
-              <circle cx="9" cy="9" r="1.5" fill="white" opacity="0.85" />
-              <line x1="4" y1="4" x2="9" y2="9" stroke="white" strokeWidth="1" opacity="0.5" />
-              <line x1="14" y1="4" x2="9" y2="9" stroke="white" strokeWidth="1" opacity="0.5" />
-              <line x1="4" y1="14" x2="9" y2="9" stroke="white" strokeWidth="1" opacity="0.5" />
-              <line x1="14" y1="14" x2="9" y2="9" stroke="white" strokeWidth="1" opacity="0.5" />
-            </svg>
-          </div>
-          <span className="font-bold text-base tracking-tight text-foreground">Foundwork</span>
+        <button onClick={() => handleNav("/app/dashboard")} className="flex items-center">
+          <Logo />
         </button>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
           {navLinks.map((link) => (
             <button
               key={link.href}
               onClick={() => handleNav(link.href)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(link.href)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                isActive(link.href) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
               <link.icon className="w-4 h-4" />
@@ -75,9 +71,7 @@ export default function AppNavbar() {
           ))}
         </nav>
 
-        {/* Desktop Right */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Home link */}
           <button
             onClick={() => handleNav("/")}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -95,7 +89,6 @@ export default function AppNavbar() {
             {profile ? "Add Listing" : "Create Profile"}
           </button>
 
-          {/* User dropdown */}
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -120,13 +113,10 @@ export default function AppNavbar() {
                   <div className="p-3 border-b border-border">
                     <div className="text-sm font-bold text-foreground">{currentUser?.name}</div>
                     <div className="text-xs text-muted-foreground">{currentUser?.email}</div>
-                    <div className="text-xs text-primary font-semibold mt-0.5">{currentUser?.city}</div>
+                    <div className="text-xs text-primary font-semibold mt-0.5">{currentUser?.district || currentUser?.city}</div>
                   </div>
                   <div className="p-1.5">
-                    <button
-                      onClick={() => handleNav("/")}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
-                    >
+                    <button onClick={() => handleNav("/")} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors">
                       <Home className="w-4 h-4 text-muted-foreground" />
                       Homepage
                     </button>
@@ -145,10 +135,7 @@ export default function AppNavbar() {
                       Post a Job
                     </button>
                     <div className="my-1 border-t border-border" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-sm text-destructive text-left transition-colors"
-                    >
+                    <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-sm text-destructive text-left transition-colors">
                       <LogOut className="w-4 h-4" />
                       Sign Out
                     </button>
@@ -159,16 +146,11 @@ export default function AppNavbar() {
           </div>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-        >
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -190,18 +172,11 @@ export default function AppNavbar() {
                   {link.label}
                 </button>
               ))}
-
               <div className="my-2 border-t border-border" />
-
-              {/* Home */}
-              <button
-                onClick={() => handleNav("/")}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
+              <button onClick={() => handleNav("/")} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors">
                 <Home className="w-4 h-4 text-muted-foreground" />
                 Go to Homepage
               </button>
-
               <button
                 onClick={() => handleNav(profile ? "/app/listings/add" : "/app/profile/create")}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/8 transition-colors mt-1"
@@ -209,19 +184,7 @@ export default function AppNavbar() {
                 <PlusCircle className="w-4 h-4" />
                 {profile ? "Add Listing" : "Create Profile"}
               </button>
-
-              <button
-                onClick={() => handleNav("/app/jobs/post")}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                <Briefcase className="w-4 h-4 text-muted-foreground" />
-                Post a Job
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
-              >
+              <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
