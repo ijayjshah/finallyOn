@@ -6,7 +6,23 @@ import { BRAND } from "@/types";
 import { useApp } from "@/context/AppContext";
 import LoginPromptModal from "@/components/LoginPromptModal";
 
-const navGroups = [
+type BrowseKey = "services" | "businesses" | "jobs";
+
+type NavItem =
+  | { label: string; href: string; browse?: never; children?: never }
+  | { label: string; href?: never; browse?: never; children: { label: string; href: string; desc: string; icon?: never }[] }
+  | { label: string; href?: never; browse: true; children: { label: string; href: BrowseKey; desc: string; icon: React.ElementType }[] };
+
+const navGroups: NavItem[] = [
+  {
+    label: "View",
+    browse: true,
+    children: [
+      { label: "Services", href: "services", desc: "Electricians, tutors, beauticians & more", icon: Wrench },
+      { label: "Businesses", href: "businesses", desc: "Shops, clinics, restaurants & stores", icon: Store },
+      { label: "Jobs & Work", href: "jobs", desc: "Local job openings & job seekers", icon: Briefcase },
+    ],
+  },
   { label: "How It Works", href: "/how-it-works" },
   {
     label: "For Businesses",
@@ -23,11 +39,11 @@ const navGroups = [
   { label: "Contact", href: "/contact" },
 ];
 
-const BROWSE_TABS = [
-  { key: "services" as const, label: "Services", icon: Wrench, color: "text-indigo-600 bg-indigo-50 border-indigo-200", desc: "Electricians, tutors, artists…" },
-  { key: "businesses" as const, label: "Businesses", icon: Store, color: "text-amber-600 bg-amber-50 border-amber-200", desc: "Shops, clinics, restaurants…" },
-  { key: "jobs" as const, label: "Jobs & Work", icon: Briefcase, color: "text-emerald-600 bg-emerald-50 border-emerald-200", desc: "Local openings & job seekers" },
-];
+const ICON_COLORS: Record<string, string> = {
+  services: "text-indigo-500 bg-indigo-50",
+  businesses: "text-amber-500 bg-amber-50",
+  jobs: "text-emerald-500 bg-emerald-50",
+};
 
 const Logo = () => (
   <div className="flex items-center gap-2.5">
@@ -55,7 +71,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [loginPrompt, setLoginPrompt] = useState<"services" | "businesses" | "jobs" | null>(null);
+  const [loginPrompt, setLoginPrompt] = useState<BrowseKey | null>(null);
   const [, navigate] = useLocation();
   const { currentUser } = useApp();
 
@@ -71,17 +87,18 @@ export default function Navbar() {
     setOpenDropdown(null);
   };
 
-  const handleBrowse = (key: "services" | "businesses" | "jobs") => {
+  const handleBrowse = (key: BrowseKey) => {
+    setOpenDropdown(null);
+    setMobileOpen(false);
     if (currentUser) {
       if (key === "jobs") {
-        go("/app/jobs");
+        navigate("/app/jobs");
       } else {
-        go(`/app/discover?tab=${key}`);
+        navigate(`/app/discover?tab=${key}`);
       }
     } else {
       setLoginPrompt(key);
     }
-    setMobileOpen(false);
   };
 
   return (
@@ -91,7 +108,9 @@ export default function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "top-0 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm" : "top-9 bg-transparent"
+          scrolled
+            ? "top-0 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm"
+            : "top-9 bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between">
@@ -101,61 +120,100 @@ export default function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {/* Browse public sections */}
-            {BROWSE_TABS.map((tab) => {
-              const Icon = tab.icon;
+            {navGroups.map((item) => {
+              if (item.children && item.browse) {
+                /* ── "View" browse dropdown ── */
+                return (
+                  <div key={item.label} className="relative">
+                    <button
+                      onMouseEnter={() => setOpenDropdown(item.label)}
+                      onMouseLeave={() => setOpenDropdown(null)}
+                      className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                    >
+                      {item.label}
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                    <AnimatePresence>
+                      {openDropdown === item.label && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
+                          onMouseEnter={() => setOpenDropdown(item.label)}
+                          onMouseLeave={() => setOpenDropdown(null)}
+                          className="absolute top-full left-0 mt-1 w-64 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                        >
+                          <div className="p-1.5">
+                            {item.children.map((child) => {
+                              const Icon = child.icon;
+                              const colorCls = ICON_COLORS[child.href as string] ?? "text-primary bg-primary/10";
+                              return (
+                                <button
+                                  key={child.href}
+                                  onClick={() => handleBrowse(child.href as BrowseKey)}
+                                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors text-left"
+                                >
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorCls}`}>
+                                    <Icon className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <div className="text-sm font-semibold text-foreground">{child.label}</div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">{child.desc}</div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+
+              if (item.children) {
+                /* ── Regular dropdown (For Businesses etc.) ── */
+                return (
+                  <div key={item.label} className="relative">
+                    <button
+                      onMouseEnter={() => setOpenDropdown(item.label)}
+                      onMouseLeave={() => setOpenDropdown(null)}
+                      className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      {item.label}
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    <AnimatePresence>
+                      {openDropdown === item.label && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
+                          onMouseEnter={() => setOpenDropdown(item.label)}
+                          onMouseLeave={() => setOpenDropdown(null)}
+                          className="absolute top-full left-0 mt-1 w-56 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                        >
+                          {item.children.map((child) => (
+                            <button
+                              key={child.href}
+                              onClick={() => go(child.href)}
+                              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-0"
+                            >
+                              <div className="text-sm font-semibold text-foreground">{child.label}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5">{child.desc}</div>
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+
+              /* ── Plain link ── */
               return (
-                <button
-                  key={tab.key}
-                  onClick={() => handleBrowse(tab.key)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-
-            <span className="w-px h-5 bg-border mx-1" />
-
-            {/* Info nav groups */}
-            {navGroups.map((item) =>
-              item.children ? (
-                <div key={item.label} className="relative">
-                  <button
-                    onMouseEnter={() => setOpenDropdown(item.label)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                    className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  >
-                    {item.label}
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                  <AnimatePresence>
-                    {openDropdown === item.label && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                        onMouseEnter={() => setOpenDropdown(item.label)}
-                        onMouseLeave={() => setOpenDropdown(null)}
-                        className="absolute top-full left-0 mt-1 w-56 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
-                      >
-                        {item.children.map((child) => (
-                          <button
-                            key={child.href}
-                            onClick={() => go(child.href)}
-                            className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-0"
-                          >
-                            <div className="text-sm font-semibold text-foreground">{child.label}</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">{child.desc}</div>
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
                 <button
                   key={item.href}
                   onClick={() => go(item.href!)}
@@ -163,10 +221,11 @@ export default function Navbar() {
                 >
                   {item.label}
                 </button>
-              )
-            )}
+              );
+            })}
           </nav>
 
+          {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-2">
             {currentUser ? (
               <button
@@ -201,7 +260,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {/* ── Mobile menu ── */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
@@ -211,31 +270,39 @@ export default function Navbar() {
               className="lg:hidden bg-background/98 backdrop-blur-xl border-b border-border overflow-hidden"
             >
               <div className="px-5 py-5 space-y-1">
-                {/* Browse section */}
-                <div className="pb-2">
-                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Browse Navsari</div>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {BROWSE_TABS.map((tab) => {
-                      const Icon = tab.icon;
-                      return (
-                        <button
-                          key={tab.key}
-                          onClick={() => handleBrowse(tab.key)}
-                          className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-colors ${tab.color} hover:opacity-80`}
-                        >
-                          <Icon className="w-5 h-5" />
-                          <span className="text-xs font-bold leading-tight">{tab.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="border-t border-border pt-2">
-                  {navGroups.map((item) =>
-                    item.children ? (
+                {navGroups.map((item) => {
+                  if (item.children && item.browse) {
+                    return (
                       <div key={item.label}>
-                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">{item.label}</div>
+                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          View
+                        </div>
+                        {item.children.map((child) => {
+                          const Icon = child.icon;
+                          const colorCls = ICON_COLORS[child.href as string] ?? "text-primary bg-primary/10";
+                          return (
+                            <button
+                              key={child.href}
+                              onClick={() => handleBrowse(child.href as BrowseKey)}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+                            >
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${colorCls}`}>
+                                <Icon className="w-3.5 h-3.5" />
+                              </div>
+                              {child.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+
+                  if (item.children) {
+                    return (
+                      <div key={item.label}>
+                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          {item.label}
+                        </div>
                         {item.children.map((child) => (
                           <button
                             key={child.href}
@@ -246,29 +313,40 @@ export default function Navbar() {
                           </button>
                         ))}
                       </div>
-                    ) : (
-                      <button
-                        key={item.href}
-                        onClick={() => go(item.href!)}
-                        className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                      >
-                        {item.label}
-                      </button>
-                    )
-                  )}
-                </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => go(item.href!)}
+                      className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
 
                 <div className="pt-3 flex flex-col gap-2 border-t border-border">
                   {currentUser ? (
-                    <button onClick={() => go("/app/dashboard")} className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => go("/app/dashboard")}
+                      className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                    >
                       Go to App <ArrowRight className="w-4 h-4" />
                     </button>
                   ) : (
                     <>
-                      <button onClick={() => go("/login")} className="py-2.5 rounded-lg border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+                      <button
+                        onClick={() => go("/login")}
+                        className="py-2.5 rounded-lg border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                      >
                         Log In
                       </button>
-                      <button onClick={() => go("/register")} className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+                      <button
+                        onClick={() => go("/register")}
+                        className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+                      >
                         List Your Business Free
                       </button>
                     </>
