@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Save, Briefcase, UserSearch } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
-import { GUJARAT_CITIES, SERVICE_CATEGORIES, EMPLOYMENT_TYPES } from "@/types";
+import { NAVSARI_AREAS, SERVICE_CATEGORIES, EMPLOYMENT_TYPES, BRAND } from "@/types";
 
 function inputCls(hasError = false) {
   return `w-full px-4 py-3 rounded-xl border ${hasError ? "border-destructive" : "border-border focus:border-primary focus:ring-primary/20"} bg-card text-foreground placeholder:text-muted-foreground text-sm outline-none focus:ring-2 transition-all`;
@@ -34,13 +34,13 @@ export default function AddEditJob() {
     listingType: "opening" as "opening" | "seeker",
     title: "",
     category: "",
-    city: currentUser?.city ?? "Surat",
-    area: "",
+    area: currentUser?.city ?? "Navsari City",
     description: "",
     salary: "",
     employmentType: "Full-time",
     experience: "",
     contact: currentUser?.phone ?? "",
+    whatsappNumber: currentUser?.whatsappNumber ?? "",
     active: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,13 +53,13 @@ export default function AddEditJob() {
         listingType: existing.listingType,
         title: existing.title,
         category: existing.category,
-        city: existing.city,
         area: existing.area,
         description: existing.description,
         salary: existing.salary,
         employmentType: existing.employmentType,
         experience: existing.experience,
         contact: existing.contact,
+        whatsappNumber: existing.whatsappNumber ?? "",
         active: existing.active,
       });
     }
@@ -74,7 +74,7 @@ export default function AddEditJob() {
     const e: Record<string, string> = {};
     if (!form.title.trim()) e.title = "Title is required.";
     if (!form.category) e.category = "Category is required.";
-    if (!form.area.trim()) e.area = "Area is required.";
+    if (!form.area) e.area = "Area is required.";
     if (!form.description.trim()) e.description = "Description is required.";
     if (!form.salary.trim()) e.salary = "Salary / expected pay is required.";
     if (!form.contact.trim()) e.contact = "Contact number is required.";
@@ -93,14 +93,17 @@ export default function AddEditJob() {
       listingType: form.listingType,
       title: form.title.trim(),
       category: form.category,
-      city: form.city,
-      area: form.area.trim(),
+      city: "Navsari",
+      area: form.area,
+      district: "Navsari",
       description: form.description.trim(),
       salary: form.salary.trim(),
       employmentType: form.employmentType,
       experience: form.experience.trim(),
       contact: form.contact.trim(),
+      whatsappNumber: form.whatsappNumber.trim(),
       active: form.active,
+      approvalStatus: "pending" as const,
     };
 
     if (isEdit && editId) {
@@ -130,7 +133,7 @@ export default function AddEditJob() {
           </button>
           {done && (
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-emerald-600 font-semibold">
-              ✓ Posted
+              Posted successfully
             </motion.span>
           )}
         </div>
@@ -138,7 +141,7 @@ export default function AddEditJob() {
         <h1 className="text-2xl font-extrabold text-foreground mb-2">
           {isEdit ? "Edit Job Post" : "Post to Jobs Board"}
         </h1>
-        <p className="text-sm text-muted-foreground mb-7">Free to post — visible to everyone on Foundwork.</p>
+        <p className="text-sm text-muted-foreground mb-7">Free to post — visible to everyone on {BRAND.name}.</p>
 
         <div className="space-y-5">
           {/* Listing type */}
@@ -200,19 +203,14 @@ export default function AddEditJob() {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="City">
-              <select value={form.city} onChange={(e) => set("city", e.target.value)} className={inputCls()}>
-                {GUJARAT_CITIES.map((c) => <option key={c}>{c}</option>)}
-              </select>
+            <Field label="District">
+              <input type="text" value="Navsari" readOnly className={`${inputCls()} bg-muted text-muted-foreground cursor-not-allowed`} />
             </Field>
             <Field label="Area / Locality" error={errors.area}>
-              <input
-                type="text"
-                value={form.area}
-                onChange={(e) => set("area", e.target.value)}
-                placeholder="e.g. Adajan"
-                className={inputCls(!!errors.area)}
-              />
+              <select value={form.area} onChange={(e) => set("area", e.target.value)} className={inputCls(!!errors.area)}>
+                <option value="">Select area...</option>
+                {NAVSARI_AREAS.map((a) => <option key={a}>{a}</option>)}
+              </select>
             </Field>
           </div>
 
@@ -277,6 +275,16 @@ export default function AddEditJob() {
             />
           </Field>
 
+          <Field label="WhatsApp Number" hint="Optional — allows direct WhatsApp contact.">
+            <input
+              type="tel"
+              value={form.whatsappNumber}
+              onChange={(e) => set("whatsappNumber", e.target.value)}
+              placeholder="+91 98765 43210"
+              className={inputCls()}
+            />
+          </Field>
+
           <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-muted/30">
             <input
               type="checkbox"
@@ -290,6 +298,10 @@ export default function AddEditJob() {
             </label>
           </div>
 
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 text-xs text-amber-700">
+            Your post will be reviewed by our team before going live. This usually takes under 24 hours.
+          </div>
+
           {/* Submit */}
           <div className="flex gap-3 pt-2">
             <button
@@ -300,7 +312,7 @@ export default function AddEditJob() {
               {saving ? (
                 <span className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
               ) : (
-                <><Save className="w-4 h-4" /> {isEdit ? "Save Changes" : "Post to Jobs Board"}</>
+                <><Save className="w-4 h-4" /> {isEdit ? "Save Changes" : "Submit for Review"}</>
               )}
             </button>
             <button

@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import AppNavbar from "./AppNavbar";
 import Footer from "./Footer";
+import OnboardingWalkthrough from "./OnboardingWalkthrough";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export default function AppLayout({ children, hideFooter }: AppLayoutProps) {
         {children}
       </main>
       {!hideFooter && <Footer />}
+      <OnboardingWalkthrough />
     </div>
   );
 }

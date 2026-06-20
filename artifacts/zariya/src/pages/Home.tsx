@@ -3,9 +3,14 @@ import { useLocation } from "wouter";
 import {
   MapPin, CheckCircle2, MessageCircle, Shield, ArrowRight,
   Star, Zap, Users, Building2, Package, Briefcase,
+  Wrench, Scissors, BookOpen, Camera, Paintbrush, Sparkles,
+  UtensilsCrossed, Flower2, Gem, ShoppingBag,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AnnouncementMarquee from "@/components/AnnouncementMarquee";
+import BrandPopup from "@/components/BrandPopup";
+import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 import { BRAND, NAVSARI_AREAS, SERVICE_CATEGORIES } from "@/types";
 
 const fadeUp = {
@@ -22,18 +27,18 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 const FEATURED_CATEGORIES = [
-  { icon: "⚡", label: "Electrician" },
-  { icon: "🔧", label: "Plumber" },
-  { icon: "💄", label: "Beautician" },
-  { icon: "🍱", label: "Tiffin Service" },
-  { icon: "📚", label: "Home Tutor" },
-  { icon: "🎨", label: "Painter" },
-  { icon: "🧵", label: "Tailor" },
-  { icon: "📸", label: "Photographer" },
-  { icon: "🧹", label: "Cleaning Service" },
-  { icon: "💍", label: "Jewellery Shop" },
-  { icon: "👗", label: "Clothing & Garments" },
-  { icon: "🌿", label: "Gardener" },
+  { icon: Zap, label: "Electrician", color: "text-yellow-500 bg-yellow-50" },
+  { icon: Wrench, label: "Plumber", color: "text-blue-500 bg-blue-50" },
+  { icon: Sparkles, label: "Beautician", color: "text-pink-500 bg-pink-50" },
+  { icon: UtensilsCrossed, label: "Tiffin Service", color: "text-orange-500 bg-orange-50" },
+  { icon: BookOpen, label: "Home Tutor", color: "text-violet-500 bg-violet-50" },
+  { icon: Paintbrush, label: "Painter", color: "text-emerald-500 bg-emerald-50" },
+  { icon: Scissors, label: "Tailor", color: "text-indigo-500 bg-indigo-50" },
+  { icon: Camera, label: "Photographer", color: "text-rose-500 bg-rose-50" },
+  { icon: Shield, label: "Cleaning Service", color: "text-cyan-500 bg-cyan-50" },
+  { icon: Gem, label: "Jewellery Shop", color: "text-amber-500 bg-amber-50" },
+  { icon: ShoppingBag, label: "Clothing", color: "text-fuchsia-500 bg-fuchsia-50" },
+  { icon: Flower2, label: "Gardener", color: "text-green-500 bg-green-50" },
 ];
 
 const TRUST_ITEMS = [
@@ -89,6 +94,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <AnnouncementMarquee />
       <Navbar />
       <main>
 
@@ -205,17 +211,22 @@ export default function Home() {
         <section className="border-y border-border bg-muted/30 py-8 px-6 md:px-10">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { icon: "📍", label: "Map-verified", desc: "Businesses" },
-              { icon: "✅", label: "Admin-approved", desc: "Before going live" },
-              { icon: "💬", label: "WhatsApp-first", desc: "Booking flow" },
-              { icon: "🏘️", label: "District-first", desc: "Navsari launch" },
-            ].map((s) => (
-              <div key={s.label} className="flex flex-col items-center text-center gap-1">
-                <div className="text-2xl mb-1">{s.icon}</div>
-                <div className="text-sm font-bold text-foreground">{s.label}</div>
-                <div className="text-xs text-muted-foreground">{s.desc}</div>
-              </div>
-            ))}
+              { icon: MapPin, label: "Map-verified", desc: "Businesses", color: "text-primary bg-primary/10" },
+              { icon: CheckCircle2, label: "Admin-approved", desc: "Before going live", color: "text-emerald-600 bg-emerald-50" },
+              { icon: MessageCircle, label: "WhatsApp-first", desc: "Booking flow", color: "text-[#25D366] bg-[#25D366]/10" },
+              { icon: Building2, label: "District-first", desc: "Navsari launch", color: "text-violet-600 bg-violet-50" },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className="flex flex-col items-center text-center gap-1">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1 ${s.color}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="text-sm font-bold text-foreground">{s.label}</div>
+                  <div className="text-xs text-muted-foreground">{s.desc}</div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -349,17 +360,22 @@ export default function Home() {
             </motion.div>
 
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {FEATURED_CATEGORIES.map((cat, i) => (
-                <motion.button
-                  key={cat.label}
-                  initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp} custom={i * 0.5}
-                  onClick={() => navigate("/app/discover")}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
-                >
-                  <span className="text-2xl">{cat.icon}</span>
-                  <span className="text-[11px] font-semibold text-muted-foreground group-hover:text-primary text-center leading-tight transition-colors">{cat.label}</span>
-                </motion.button>
-              ))}
+              {FEATURED_CATEGORIES.map((cat, i) => {
+                const Icon = cat.icon;
+                return (
+                  <motion.button
+                    key={cat.label}
+                    initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp} custom={i * 0.5}
+                    onClick={() => navigate("/app/discover")}
+                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border bg-card hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200 group"
+                  >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${cat.color}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] font-semibold text-muted-foreground group-hover:text-primary text-center leading-tight transition-colors">{cat.label}</span>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -513,6 +529,8 @@ export default function Home() {
 
       </main>
       <Footer />
+      <BrandPopup />
+      <OnboardingWalkthrough />
     </div>
   );
 }

@@ -16,6 +16,9 @@ import PortfolioPage from "@/pages/PortfolioPage";
 import DistrictsPage from "@/pages/DistrictsPage";
 import TrustPage from "@/pages/TrustPage";
 import ContactPage from "@/pages/ContactPage";
+import PricingPage from "@/pages/PricingPage";
+import WaitlistPage from "@/pages/WaitlistPage";
+import AdminPage from "@/pages/AdminPage";
 
 import Dashboard from "@/pages/Dashboard";
 import Discover from "@/pages/Discover";
@@ -43,6 +46,11 @@ function Router() {
       <Route path="/districts" component={DistrictsPage} />
       <Route path="/trust" component={TrustPage} />
       <Route path="/contact" component={ContactPage} />
+      <Route path="/pricing" component={PricingPage} />
+      <Route path="/waitlist" component={WaitlistPage} />
+
+      {/* ── Admin (separate auth) ──────────────────── */}
+      <Route path="/admin" component={AdminPage} />
 
       {/* ── App shell ────────────────────────────────── */}
       <Route path="/app">

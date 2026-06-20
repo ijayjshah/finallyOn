@@ -1,6 +1,9 @@
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Star, MapPin, Shield, Phone, Clock, CheckCircle2, Edit, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft, Star, MapPin, Shield, Phone, Clock, CheckCircle2, Edit,
+  Briefcase, ChevronLeft, ChevronRight, MessageCircle, ExternalLink,
+} from "lucide-react";
 import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
@@ -27,9 +30,13 @@ export default function ViewProfile() {
   }
 
   const isOwner = currentUser?.id === profile.userId;
-
   const prevPhoto = () => setPhotoIdx((i) => (i - 1 + profile.photos.length) % profile.photos.length);
   const nextPhoto = () => setPhotoIdx((i) => (i + 1) % profile.photos.length);
+
+  const waNumber = profile.whatsappNumber?.replace(/\D/g, "") || profile.phone?.replace(/\D/g, "");
+  const waText = encodeURIComponent(
+    `Hi ${profile.name.split(" ")[0]}, I found your profile on FinallyOn. I'd like to inquire about your services.`
+  );
 
   return (
     <AppLayout>
@@ -119,7 +126,7 @@ export default function ViewProfile() {
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4 flex-shrink-0" />
-                  {profile.area}, {profile.city}
+                  {profile.area}, Navsari
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Briefcase className="w-4 h-4 flex-shrink-0" />
@@ -154,10 +161,24 @@ export default function ViewProfile() {
                   Edit Profile
                 </button>
               ) : (
-                <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-                  <Phone className="w-4 h-4" />
-                  Contact {profile.name.split(" ")[0]}
-                </button>
+                <div className="space-y-2">
+                  <a
+                    href={`https://wa.me/${waNumber}?text=${waText}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp {profile.name.split(" ")[0]}
+                  </a>
+                  <a
+                    href={`tel:${profile.phone}`}
+                    className="w-full py-2.5 rounded-xl border border-border text-foreground text-sm font-bold flex items-center justify-center gap-2 hover:bg-muted transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Call {profile.name.split(" ")[0]}
+                  </a>
+                </div>
               )}
             </div>
           </div>
@@ -224,7 +245,7 @@ export default function ViewProfile() {
               </motion.div>
             )}
 
-            {/* Info */}
+            {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -233,24 +254,55 @@ export default function ViewProfile() {
             >
               <h2 className="font-bold text-base text-foreground mb-4">Contact Information</h2>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-4 h-4 text-primary" />
+                {profile.phone && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-xs text-muted-foreground">Phone</div>
+                      <div className="text-sm font-semibold text-foreground">{profile.phone}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      {profile.whatsappNumber && (
+                        <a
+                          href={`https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}?text=${waText}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
+                      )}
+                      <a
+                        href={`tel:${profile.phone}`}
+                        className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Phone</div>
-                    <div className="text-sm font-semibold text-foreground">{profile.phone}</div>
-                  </div>
-                </div>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Location</div>
-                    <div className="text-sm font-semibold text-foreground">{profile.area}, {profile.city}, Gujarat</div>
+                    <div className="text-sm font-semibold text-foreground">{profile.area}, Navsari, Gujarat</div>
                   </div>
                 </div>
+                {profile.mapUrl && (
+                  <a
+                    href={profile.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary font-semibold hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View on Google Maps
+                  </a>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Clock className="w-4 h-4 text-primary" />
@@ -265,11 +317,26 @@ export default function ViewProfile() {
               </div>
             </motion.div>
 
+            {/* Bottom CTA */}
             {!isOwner && (
-              <button className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-primary/25">
-                <Phone className="w-5 h-5" />
-                Contact & Book {profile.name.split(" ")[0]}
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href={`https://wa.me/${waNumber}?text=${waText}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-4 rounded-2xl bg-[#25D366] text-white font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#25D366]/25"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  WhatsApp
+                </a>
+                <a
+                  href={`tel:${profile.phone}`}
+                  className="py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-base flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
+                >
+                  <Phone className="w-5 h-5" />
+                  Call Now
+                </a>
+              </div>
             )}
           </div>
         </div>

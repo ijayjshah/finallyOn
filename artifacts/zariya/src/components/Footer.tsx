@@ -38,9 +38,10 @@ const cols = [
   {
     title: "Company",
     links: [
+      { label: "Pricing", href: "/pricing" },
+      { label: "Waitlist", href: "/waitlist" },
       { label: "Contact Us", href: "/contact" },
       { label: "List Your Business", href: "/register" },
-      { label: "Digital Support", href: "https://attachtotech.xyz", external: true },
     ],
   },
 ];
@@ -99,7 +100,7 @@ export default function Footer() {
 
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-background/30">
-            © 2025 {BRAND.name}. All rights reserved. Navsari, Gujarat, India.
+            © 2026 {BRAND.name}. All rights reserved. Navsari, Gujarat, India.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <a href={`mailto:${BRAND.email}`} className="text-xs text-background/40 hover:text-background/70 transition-colors">
@@ -110,9 +111,9 @@ export default function Footer() {
               href="https://attachtotech.xyz"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-background/40 hover:text-background/70 transition-colors"
+              className="text-xs text-background/50 hover:text-background/80 transition-colors font-medium"
             >
-              Digital support: attachtotech.xyz
+              Powered by AttachToTech
             </a>
           </div>
         </div>

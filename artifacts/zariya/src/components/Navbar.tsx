@@ -12,10 +12,12 @@ const navGroups = [
       { label: "Service Providers", href: "/services", desc: "List your skills & get booked" },
       { label: "Product Sellers", href: "/products", desc: "Sell locally with WhatsApp orders" },
       { label: "Portfolio Showcase", href: "/portfolio", desc: "Your free profile page" },
+      { label: "Pricing", href: "/pricing", desc: "Free forever — see what's included" },
     ],
   },
   { label: "Districts", href: "/districts" },
   { label: "Trust & Verification", href: "/trust" },
+  { label: "Waitlist", href: "/waitlist" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -64,8 +66,8 @@ export default function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/95 backdrop-blur-xl border-b border-border shadow-sm" : "bg-transparent"
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "top-0 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm" : "top-9 bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between">

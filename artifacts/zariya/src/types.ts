@@ -121,7 +121,7 @@ export const SERVICE_CATEGORIES = [
   'Grocery / Kirana', 'Pharmacy', 'Hardware Store', 'Furniture Shop',
 ];
 
-export const PRODUCT_MAX = 20;
+export const PRODUCT_MAX = 25;
 
 export const BRAND = {
   name: 'FinallyOn',

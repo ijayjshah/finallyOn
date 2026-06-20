@@ -3,11 +3,11 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, UserSearch, Search, MapPin, Clock, IndianRupee,
-  Filter, X, PlusCircle, Building2, User,
+  Filter, X, PlusCircle, Building2, User, Phone, MessageCircle,
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
-import { GUJARAT_CITIES, SERVICE_CATEGORIES, EMPLOYMENT_TYPES, Job } from "@/types";
+import { NAVSARI_AREAS, SERVICE_CATEGORIES, EMPLOYMENT_TYPES, Job } from "@/types";
 
 type Tab = "openings" | "seekers";
 
@@ -31,7 +31,6 @@ function JobCard({ job, onClick }: { job: Job; onClick: () => void }) {
       className="w-full text-left p-5 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all duration-250 group"
     >
       <div className="flex items-start gap-4">
-        {/* Avatar */}
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-lg ${job.listingType === "opening" ? "bg-primary/10 text-primary" : "bg-emerald-50 text-emerald-600"}`}>
           {job.listingType === "opening"
             ? <Building2 className="w-5 h-5" />
@@ -57,7 +56,7 @@ function JobCard({ job, onClick }: { job: Job; onClick: () => void }) {
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3 flex-shrink-0" />
-              {job.area}, {job.city}
+              {job.area}, Navsari
             </span>
             <span className="flex items-center gap-1 text-emerald-600 font-semibold">
               <IndianRupee className="w-3 h-3 flex-shrink-0" />
@@ -80,18 +79,23 @@ function JobCard({ job, onClick }: { job: Job; onClick: () => void }) {
 }
 
 function JobModal({ job, onClose }: { job: Job; onClose: () => void }) {
+  const waNumber = job.whatsappNumber?.replace(/\D/g, "") || job.contact.replace(/\D/g, "");
+  const waText = encodeURIComponent(
+    `Hi, I saw your listing "${job.title}" on FinallyOn. I'd like to get in touch.`
+  );
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-foreground/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 16 }}
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 32 }}
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg bg-card rounded-3xl border border-border shadow-2xl overflow-hidden"
+        className="w-full sm:max-w-lg bg-card sm:rounded-3xl rounded-t-3xl border border-border shadow-2xl overflow-hidden"
       >
         {/* Header */}
         <div className={`p-6 ${job.listingType === "opening" ? "bg-primary/8 border-b border-primary/15" : "bg-emerald-50 border-b border-emerald-100"}`}>
@@ -118,11 +122,10 @@ function JobModal({ job, onClose }: { job: Job; onClose: () => void }) {
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5 overflow-y-auto max-h-[60vh]">
-          {/* Quick stats */}
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[55vh]">
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Location", value: `${job.area}, ${job.city}`, icon: MapPin },
+              { label: "Location", value: `${job.area}, Navsari`, icon: MapPin },
               { label: "Salary", value: job.salary, icon: IndianRupee },
               { label: "Employment", value: job.employmentType, icon: Briefcase },
               { label: "Experience", value: job.experience || "Not specified", icon: Clock },
@@ -137,7 +140,6 @@ function JobModal({ job, onClose }: { job: Job; onClose: () => void }) {
             ))}
           </div>
 
-          {/* Description */}
           <div>
             <h3 className="text-sm font-bold text-foreground mb-2">
               {job.listingType === "opening" ? "About This Role" : "About Me"}
@@ -149,10 +151,20 @@ function JobModal({ job, onClose }: { job: Job; onClose: () => void }) {
         {/* Footer */}
         <div className="p-5 border-t border-border flex gap-3">
           <a
-            href={`tel:${job.contact}`}
-            className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold text-center hover:opacity-90 transition-opacity"
+            href={`https://wa.me/${waNumber}?text=${waText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-3 rounded-xl bg-[#25D366] text-white text-sm font-bold text-center flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
           >
-            📞 Call {job.contact}
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
+          </a>
+          <a
+            href={`tel:${job.contact}`}
+            className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold text-center flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+          >
+            <Phone className="w-4 h-4" />
+            Call
           </a>
           <button
             onClick={onClose}
@@ -172,7 +184,7 @@ export default function Jobs() {
 
   const [tab, setTab] = useState<Tab>("openings");
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [selectedArea, setSelectedArea] = useState("All Areas");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -180,8 +192,9 @@ export default function Jobs() {
   const filtered = useMemo(() => {
     return jobs.filter((j) => {
       if (!j.active) return false;
+      if (j.approvalStatus && j.approvalStatus !== "approved") return false;
       if (j.listingType !== (tab === "openings" ? "opening" : "seeker")) return false;
-      const matchCity = selectedCity === "All Cities" || j.city === selectedCity;
+      const matchArea = selectedArea === "All Areas" || j.area === selectedArea;
       const matchCat = selectedCategory === "All Categories" || j.category === selectedCategory;
       const matchSearch =
         !search.trim() ||
@@ -189,20 +202,20 @@ export default function Jobs() {
         j.posterName.toLowerCase().includes(search.toLowerCase()) ||
         j.category.toLowerCase().includes(search.toLowerCase()) ||
         j.description.toLowerCase().includes(search.toLowerCase());
-      return matchCity && matchCat && matchSearch;
+      return matchArea && matchCat && matchSearch;
     });
-  }, [jobs, tab, search, selectedCity, selectedCategory]);
+  }, [jobs, tab, search, selectedArea, selectedCategory]);
 
-  const hasFilters = search || selectedCity !== "All Cities" || selectedCategory !== "All Categories";
+  const hasFilters = search || selectedArea !== "All Areas" || selectedCategory !== "All Categories";
 
   const clearFilters = () => {
     setSearch("");
-    setSelectedCity("All Cities");
+    setSelectedArea("All Areas");
     setSelectedCategory("All Categories");
   };
 
-  const openingCount = jobs.filter((j) => j.active && j.listingType === "opening").length;
-  const seekerCount = jobs.filter((j) => j.active && j.listingType === "seeker").length;
+  const openingCount = jobs.filter((j) => j.active && j.listingType === "opening" && (!j.approvalStatus || j.approvalStatus === "approved")).length;
+  const seekerCount = jobs.filter((j) => j.active && j.listingType === "seeker" && (!j.approvalStatus || j.approvalStatus === "approved")).length;
 
   return (
     <AppLayout>
@@ -215,8 +228,12 @@ export default function Jobs() {
           className="flex items-start justify-between gap-4 mb-6"
         >
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Navsari District</span>
+            </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-1">Jobs Board</h1>
-            <p className="text-muted-foreground text-sm">Find work or hire workers across Gujarat</p>
+            <p className="text-muted-foreground text-sm">Find work or hire workers in Navsari</p>
           </div>
           <button
             onClick={() => navigate("/app/jobs/post")}
@@ -260,10 +277,13 @@ export default function Jobs() {
         </div>
 
         {/* Tab description */}
-        <div className={`mb-5 px-4 py-3 rounded-xl border text-sm ${tab === "openings" ? "bg-primary/5 border-primary/15 text-primary" : "bg-emerald-50 border-emerald-100 text-emerald-700"}`}>
-          {tab === "openings"
-            ? "🏢 These are job openings posted by businesses and employers looking to hire workers."
-            : "👋 These are workers actively looking for employment — contact them directly to hire."}
+        <div className={`mb-5 px-4 py-3 rounded-xl border text-sm flex items-start gap-2.5 ${tab === "openings" ? "bg-primary/5 border-primary/15 text-primary" : "bg-emerald-50 border-emerald-100 text-emerald-700"}`}>
+          {tab === "openings" ? <Building2 className="w-4 h-4 mt-0.5 flex-shrink-0" /> : <User className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+          <span>
+            {tab === "openings"
+              ? "Job openings posted by businesses and employers looking to hire workers in Navsari."
+              : "Workers actively looking for employment — contact them directly to hire."}
+          </span>
         </div>
 
         {/* Search & Filters */}
@@ -298,12 +318,12 @@ export default function Jobs() {
                 className="flex flex-col sm:flex-row gap-3 overflow-hidden"
               >
                 <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
+                  value={selectedArea}
+                  onChange={(e) => setSelectedArea(e.target.value)}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary"
                 >
-                  <option>All Cities</option>
-                  {GUJARAT_CITIES.map((c) => <option key={c}>{c}</option>)}
+                  <option>All Areas</option>
+                  {NAVSARI_AREAS.map((a) => <option key={a}>{a}</option>)}
                 </select>
                 <select
                   value={selectedCategory}
@@ -322,15 +342,15 @@ export default function Jobs() {
             )}
           </AnimatePresence>
 
-          {/* City chips */}
+          {/* Area chips */}
           <div className="flex gap-2 flex-wrap">
-            {["All Cities", ...GUJARAT_CITIES].map((c) => (
+            {["All Areas", ...NAVSARI_AREAS.slice(0, 5)].map((a) => (
               <button
-                key={c}
-                onClick={() => setSelectedCity(c)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedCity === c ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+                key={a}
+                onClick={() => setSelectedArea(a)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === a ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
               >
-                {c}
+                {a}
               </button>
             ))}
           </div>
@@ -368,12 +388,12 @@ export default function Jobs() {
           </div>
         )}
 
-        {/* My posts CTA */}
+        {/* CTA */}
         {currentUser && (
           <div className="mt-8 p-5 rounded-2xl border border-border bg-muted/30 flex items-center justify-between gap-4">
             <div>
               <p className="font-semibold text-sm text-foreground">Have a job opening or looking for work?</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Post it for free — reach workers and employers across Gujarat.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Post it for free — reach workers and employers in Navsari.</p>
             </div>
             <button
               onClick={() => navigate("/app/jobs/post")}
@@ -386,7 +406,6 @@ export default function Jobs() {
         )}
       </div>
 
-      {/* Job detail modal */}
       <AnimatePresence>
         {selectedJob && (
           <JobModal job={selectedJob} onClose={() => setSelectedJob(null)} />

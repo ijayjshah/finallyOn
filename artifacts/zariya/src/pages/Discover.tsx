@@ -1,28 +1,27 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Search, MapPin, Star, Shield, Filter, X } from "lucide-react";
+import { Search, MapPin, Star, Shield, Filter, X, MessageCircle, Phone } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
-import { GUJARAT_CITIES, EXPANDING_CITIES, SERVICE_CATEGORIES } from "@/types";
-
-const ALL_CITIES_FULL = [
-  ...GUJARAT_CITIES.map((c) => ({ name: c, status: "live" as const })),
-  ...EXPANDING_CITIES.map((c) => ({ name: c, status: "coming" as const })),
-];
+import { NAVSARI_AREAS, SERVICE_CATEGORIES } from "@/types";
 
 export default function Discover() {
   const [, navigate] = useLocation();
   const { profiles } = useApp();
 
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [selectedArea, setSelectedArea] = useState("All Areas");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showFilters, setShowFilters] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [availableOnly, setAvailableOnly] = useState(false);
+
+  const approvedProfiles = profiles.filter((p) => p.approvalStatus === "approved");
 
   const filtered = useMemo(() => {
-    return profiles.filter((p) => {
-      const matchCity = selectedCity === "All Cities" || p.city === selectedCity;
+    return approvedProfiles.filter((p) => {
+      const matchArea = selectedArea === "All Areas" || p.area === selectedArea;
       const matchCat = selectedCategory === "All Categories" || p.category === selectedCategory;
       const matchSearch =
         !search.trim() ||
@@ -30,17 +29,26 @@ export default function Discover() {
         p.category.toLowerCase().includes(search.toLowerCase()) ||
         p.area.toLowerCase().includes(search.toLowerCase()) ||
         p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-      return matchCity && matchCat && matchSearch;
+      const matchVerified = !verifiedOnly || p.verified;
+      const matchAvailable = !availableOnly || p.available;
+      return matchArea && matchCat && matchSearch && matchVerified && matchAvailable;
     });
-  }, [profiles, search, selectedCity, selectedCategory]);
+  }, [approvedProfiles, search, selectedArea, selectedCategory, verifiedOnly, availableOnly]);
 
   const clearFilters = () => {
     setSearch("");
-    setSelectedCity("All Cities");
+    setSelectedArea("All Areas");
     setSelectedCategory("All Categories");
+    setVerifiedOnly(false);
+    setAvailableOnly(false);
   };
 
-  const hasActiveFilters = search || selectedCity !== "All Cities" || selectedCategory !== "All Categories";
+  const hasActiveFilters =
+    search ||
+    selectedArea !== "All Areas" ||
+    selectedCategory !== "All Categories" ||
+    verifiedOnly ||
+    availableOnly;
 
   return (
     <AppLayout>
@@ -52,8 +60,12 @@ export default function Discover() {
           transition={{ duration: 0.45 }}
           className="mb-6"
         >
+          <div className="flex items-center gap-2 mb-1">
+            <MapPin className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">Navsari District</span>
+          </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-1">Discover Local Services</h1>
-          <p className="text-muted-foreground text-sm">Find verified workers and sellers across Gujarat</p>
+          <p className="text-muted-foreground text-sm">Find verified workers and businesses near you</p>
         </motion.div>
 
         {/* Search & filters */}
@@ -80,9 +92,7 @@ export default function Discover() {
             >
               <Filter className="w-4 h-4" />
               Filters
-              {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-primary" />
-              )}
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
             </button>
           </div>
 
@@ -90,71 +100,85 @@ export default function Discover() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex flex-col sm:flex-row gap-3 overflow-hidden"
+              className="space-y-3 overflow-hidden"
             >
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary transition-all"
-              >
-                <option>All Cities</option>
-                {ALL_CITIES_FULL.map((c) => (
-                  <option key={c.name} value={c.name} disabled={c.status === "coming"}>
-                    {c.name}{c.status === "coming" ? " (Coming Soon)" : ""}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary transition-all"
-              >
-                <option>All Categories</option>
-                {SERVICE_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              <div className="flex flex-col sm:flex-row gap-3">
+                <select
+                  value={selectedArea}
+                  onChange={(e) => setSelectedArea(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary transition-all"
                 >
-                  <X className="w-3.5 h-3.5" />
-                  Clear all
-                </button>
-              )}
+                  <option>All Areas</option>
+                  {NAVSARI_AREAS.map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary transition-all"
+                >
+                  <option>All Categories</option>
+                  {SERVICE_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => setVerifiedOnly(e.target.checked)}
+                    className="w-4 h-4 accent-primary rounded"
+                  />
+                  <span className="text-sm font-medium text-foreground">Verified only</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={availableOnly}
+                    onChange={(e) => setAvailableOnly(e.target.checked)}
+                    className="w-4 h-4 accent-primary rounded"
+                  />
+                  <span className="text-sm font-medium text-foreground">Available now</span>
+                </label>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear all
+                  </button>
+                )}
+              </div>
             </motion.div>
           )}
 
-          {/* City chips */}
+          {/* Area chips */}
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => setSelectedCity("All Cities")}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedCity === "All Cities" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setSelectedArea("All Areas")}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === "All Areas" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
             >
-              All Cities
+              All Areas
             </button>
-            {GUJARAT_CITIES.map((c) => (
+            {NAVSARI_AREAS.slice(0, 6).map((a) => (
               <button
-                key={c}
-                onClick={() => setSelectedCity(c)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedCity === c ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+                key={a}
+                onClick={() => setSelectedArea(a)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === a ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
               >
-                {c}
+                {a}
               </button>
-            ))}
-            {EXPANDING_CITIES.map((c) => (
-              <span key={c} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-border/50 text-muted-foreground/50 bg-muted/30">
-                {c} (Soon)
-              </span>
             ))}
           </div>
         </motion.div>
 
         {/* Results count */}
         <div className="text-sm text-muted-foreground mb-5">
-          {filtered.length} provider{filtered.length !== 1 ? "s" : ""} found
+          {filtered.length} provider{filtered.length !== 1 ? "s" : ""} found in Navsari
           {hasActiveFilters && (
             <button onClick={clearFilters} className="ml-2 text-primary font-semibold hover:underline">
               Clear filters
@@ -170,7 +194,10 @@ export default function Discover() {
             </div>
             <h3 className="font-bold text-lg text-foreground mb-2">No results found</h3>
             <p className="text-muted-foreground text-sm">Try adjusting your search or filters.</p>
-            <button onClick={clearFilters} className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+            <button
+              onClick={clearFilters}
+              className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
               Clear Filters
             </button>
           </div>
@@ -183,70 +210,92 @@ export default function Discover() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
               >
-                <button
-                  onClick={() => navigate(`/app/profile/${profile.id}`)}
-                  className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden group"
-                  data-testid={`discover-card-${profile.id}`}
-                >
+                <div className="rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden group">
                   {/* Photo strip */}
-                  <div className="relative h-40 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
-                    {profile.photos.length > 0 ? (
-                      <img
-                        src={profile.photos[0]}
-                        alt={profile.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-5xl font-black text-primary/20">{profile.name.charAt(0)}</span>
+                  <button
+                    onClick={() => navigate(`/app/profile/${profile.id}`)}
+                    className="w-full text-left"
+                  >
+                    <div className="relative h-40 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
+                      {profile.photos.length > 0 ? (
+                        <img
+                          src={profile.photos[0]}
+                          alt={profile.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-5xl font-black text-primary/20">{profile.name.charAt(0)}</span>
+                        </div>
+                      )}
+                      {profile.verified && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur border border-border shadow-sm">
+                          <Shield className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] font-bold text-primary">Verified</span>
+                        </div>
+                      )}
+                      {profile.available && (
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500 shadow-sm">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                          <span className="text-[10px] font-bold text-white">Available</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 pb-3">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <div className="font-bold text-sm text-foreground">{profile.name}</div>
+                          <div className="text-xs font-semibold text-primary mt-0.5">{profile.category}</div>
+                        </div>
+                        {profile.rating > 0 && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            <span className="text-sm font-bold text-foreground">{profile.rating}</span>
+                            <span className="text-xs text-muted-foreground">({profile.reviewCount})</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {profile.verified && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur border border-border shadow-sm">
-                        <Shield className="w-3 h-3 text-primary" />
-                        <span className="text-[10px] font-bold text-primary">Verified</span>
+
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        {profile.area}, Navsari
                       </div>
-                    )}
-                    {profile.available && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500 shadow-sm">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        <span className="text-[10px] font-bold text-white">Available</span>
+
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {profile.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/8 text-primary">
+                            {tag}
+                          </span>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  </button>
+
+                  {/* Action row */}
+                  <div className="px-4 pb-4 flex gap-2">
+                    {profile.whatsappNumber ? (
+                      <a
+                        href={`https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${profile.name.split(" ")[0]}, I found you on FinallyOn. I'd like to inquire about your services.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        WhatsApp
+                      </a>
+                    ) : null}
+                    <a
+                      href={`tel:${profile.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border text-foreground text-xs font-bold hover:bg-muted transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      Call
+                    </a>
                   </div>
-
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <div className="font-bold text-sm text-foreground">{profile.name}</div>
-                        <div className="text-xs font-semibold text-primary mt-0.5">{profile.category}</div>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                        <span className="text-sm font-bold text-foreground">{profile.rating}</span>
-                        <span className="text-xs text-muted-foreground">({profile.reviewCount})</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                      <MapPin className="w-3 h-3 flex-shrink-0" />
-                      {profile.area}, {profile.city}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {profile.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/8 text-primary">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3">
-                      <span>{profile.experience} experience</span>
-                      <span className="font-semibold text-primary">View Profile →</span>
-                    </div>
-                  </div>
-                </button>
+                </div>
               </motion.div>
             ))}
           </div>
