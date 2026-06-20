@@ -33,6 +33,7 @@ export default function EditProfile() {
   const [form, setForm] = useState({
     name: "",
     category: "",
+    customCategory: "",
     city: "Surat",
     area: "",
     phone: "",
@@ -92,6 +93,7 @@ export default function EditProfile() {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = "Name is required.";
     if (!form.category) e.category = "Category is required.";
+    if (form.category === "__other__" && !form.customCategory.trim()) e.customCategory = "Please describe your category.";
     if (!form.area.trim()) e.area = "Area is required.";
     if (!form.phone.trim()) e.phone = "Phone is required.";
     if (!form.description.trim()) e.description = "Description is required.";
@@ -105,7 +107,7 @@ export default function EditProfile() {
     await new Promise((r) => setTimeout(r, 500));
     updateProfile(profile.id, {
       name: form.name.trim(),
-      category: form.category,
+      category: form.category === "__other__" ? form.customCategory.trim() : form.category,
       city: form.city,
       area: form.area.trim(),
       phone: form.phone.trim(),
@@ -158,11 +160,15 @@ export default function EditProfile() {
                 placeholder="Your name" className={inputCls(!!errors.name)} />
             </Field>
 
-            <Field label="Service Category" error={errors.category}>
-              <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls(!!errors.category)}>
+            <Field label="Service Category" error={errors.category || errors.customCategory}>
+              <select value={form.category} onChange={(e) => { set("category", e.target.value); set("customCategory", ""); }} className={inputCls(!!errors.category)}>
                 <option value="">Select category...</option>
                 {SERVICE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="__other__">Other (not listed)</option>
               </select>
+              {form.category === "__other__" && (
+                <input type="text" value={form.customCategory} onChange={(e) => set("customCategory", e.target.value)} placeholder="e.g. Flower Shop, Bike Mechanic..." className={`${inputCls(!!errors.customCategory)} mt-2`} />
+              )}
             </Field>
 
             <div className="grid grid-cols-2 gap-4">

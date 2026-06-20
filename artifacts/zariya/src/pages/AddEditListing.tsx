@@ -39,6 +39,7 @@ export default function AddEditListing() {
     title: "",
     type: "service" as "service" | "product",
     category: "",
+    customCategory: "",
     subCategory: "",
     description: "",
     price: "",
@@ -81,6 +82,7 @@ export default function AddEditListing() {
     const e: Record<string, string> = {};
     if (!form.title.trim()) e.title = "Title is required.";
     if (!form.category) e.category = "Category is required.";
+    if (form.category === "__other__" && !form.customCategory.trim()) e.customCategory = "Please describe your category.";
     if (!form.description.trim()) e.description = "Description is required.";
     if (!form.price.trim()) e.price = "Price is required.";
     if (!form.area.trim()) e.area = "Area is required.";
@@ -99,7 +101,7 @@ export default function AddEditListing() {
       userId: currentUser.id,
       title: form.title.trim(),
       type: form.type,
-      category: form.category,
+      category: form.category === "__other__" ? form.customCategory.trim() : form.category,
       subCategory: form.subCategory.trim(),
       description: form.description.trim(),
       price: form.price.trim(),
@@ -202,11 +204,15 @@ export default function AddEditListing() {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Category" error={errors.category}>
-              <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls(!!errors.category)}>
+            <Field label="Category" error={errors.category || errors.customCategory}>
+              <select value={form.category} onChange={(e) => { set("category", e.target.value); set("customCategory", ""); }} className={inputCls(!!errors.category)}>
                 <option value="">Select category...</option>
                 {SERVICE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="__other__">Other (not listed)</option>
               </select>
+              {form.category === "__other__" && (
+                <input type="text" value={form.customCategory} onChange={(e) => set("customCategory", e.target.value)} placeholder="e.g. Flower Shop, Bike Mechanic..." className={`${inputCls(!!errors.customCategory)} mt-2`} />
+              )}
             </Field>
             <Field label="Sub-category / Type" hint="e.g. Gold, Bridal, Veg, Kids">
               <input

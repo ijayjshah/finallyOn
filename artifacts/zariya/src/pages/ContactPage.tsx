@@ -103,12 +103,15 @@ export default function ContactPage() {
                 <p className="text-xs text-muted-foreground">Expanding to Surat, Valsad, and Vapi in 2025.</p>
               </div>
               <div>
-                <div className="font-bold text-sm text-foreground mb-1">Need digital setup?</div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  For businesses without a physical shop or needing digital marketing support, visit{" "}
-                  <a href="https://attachtotech.xyz" target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">
-                    attachtotech.xyz
-                  </a>.
+                <div className="font-bold text-sm text-foreground mb-1">Digital Partner</div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">Official</span>
+                  <a href="https://attachtotech.xyz" target="_blank" rel="noopener noreferrer" className="text-sm font-extrabold text-primary hover:underline">
+                    AttachToTech
+                  </a>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Websites, branding &amp; digital marketing for local businesses.
                 </p>
               </div>
             </div>
@@ -239,19 +242,28 @@ export default function ContactPage() {
 
                 <div className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#25D366]/15 flex items-center justify-center flex-shrink-0">
-                      <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-primary" viewBox="0 0 20 20" fill="none">
+                        <circle cx="5" cy="5" r="2" fill="currentColor" />
+                        <circle cx="15" cy="5" r="2" fill="currentColor" opacity="0.5" />
+                        <circle cx="5" cy="15" r="2" fill="currentColor" opacity="0.5" />
+                        <circle cx="15" cy="15" r="2" fill="currentColor" />
+                        <circle cx="10" cy="10" r="1.5" fill="currentColor" opacity="0.8" />
+                      </svg>
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-foreground mb-1">Digital Support</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="font-bold text-sm text-foreground">AttachToTech</div>
+                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">Digital Partner</span>
+                      </div>
                       <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-                        For businesses needing website, digital marketing, or online setup beyond FinallyOn's scope:
+                        Need a website, social media presence, or full digital marketing? FinallyOn's official digital partner handles it all.
                       </p>
                       <a
                         href="https://attachtotech.xyz"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-primary font-semibold hover:underline flex items-center gap-1"
+                        className="text-sm text-primary font-bold hover:underline flex items-center gap-1"
                       >
                         attachtotech.xyz <ArrowRight className="w-3.5 h-3.5" />
                       </a>

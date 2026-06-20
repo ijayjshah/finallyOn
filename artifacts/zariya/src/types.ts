@@ -138,8 +138,8 @@ export const BRAND = {
   name: 'FinallyOn',
   tagline: 'Finally, local businesses online. Properly.',
   district: 'Navsari',
-  email: 'hello@finallyon.in',
-  support: 'support@finallyon.in',
+  email: 'hellofinallyon@gmail.com',
+  support: 'hellofinallyon@gmail.com',
   website: 'finallyon.in',
   digitalSupport: 'attachtotech.xyz',
 } as const;

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, MapPin, Zap, Users, MessageCircle } from "lucide-react";
+import { CheckCircle2, Zap, Users, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { BRAND, SERVICE_CATEGORIES, ALL_DISTRICTS, COMING_SOON_DISTRICTS } from "@/types";
+import { BRAND, SERVICE_CATEGORIES, COMING_SOON_DISTRICTS } from "@/types";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -15,7 +15,7 @@ function inputCls(err = false) {
 }
 
 export default function WaitlistPage() {
-  const [form, setForm] = useState({ name: "", phone: "", email: "", district: "", category: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", district: "", category: "", customCategory: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -30,8 +30,9 @@ export default function WaitlistPage() {
     if (!form.name.trim()) e.name = "Name is required";
     if (!form.phone.trim()) e.phone = "Phone number is required";
     if (!form.email.trim()) e.email = "Email is required";
-    if (!form.district) e.district = "Select your district";
+    if (!form.district.trim()) e.district = "Please enter your city or district";
     if (!form.category) e.category = "Select your category";
+    if (form.category === "__other__" && !form.customCategory.trim()) e.customCategory = "Please describe your business / service";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -40,10 +41,10 @@ export default function WaitlistPage() {
     if (!validate()) return;
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 700));
-    // Store in localStorage for admin
     try {
       const leads = JSON.parse(localStorage.getItem("fo_waitlist") ?? "[]");
-      leads.push({ ...form, id: Date.now().toString(), createdAt: new Date().toISOString() });
+      const finalCategory = form.category === "__other__" ? form.customCategory.trim() : form.category;
+      leads.push({ ...form, category: finalCategory, id: Date.now().toString(), createdAt: new Date().toISOString() });
       localStorage.setItem("fo_waitlist", JSON.stringify(leads));
     } catch {}
     setSubmitting(false);
@@ -56,6 +57,8 @@ export default function WaitlistPage() {
     { icon: MessageCircle, label: "Direct Support", desc: "Onboarding help via WhatsApp" },
   ];
 
+  const finalCategory = form.category === "__other__" ? form.customCategory : form.category;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
@@ -65,7 +68,7 @@ export default function WaitlistPage() {
             {/* Left */}
             <motion.div variants={fadeUp} initial="hidden" animate="show">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wide uppercase mb-4">
-                Coming to Your District
+                Coming to Your City
               </span>
               <h1 className="text-4xl font-extrabold text-foreground mb-4 leading-tight">
                 Be first when<br />
@@ -73,7 +76,7 @@ export default function WaitlistPage() {
                 in your area.
               </h1>
               <p className="text-muted-foreground text-base leading-relaxed mb-8">
-                Register your interest now. When your district goes live, you'll be among the first to get a verified business profile — free, always.
+                Register your interest now. When your city goes live, you'll be among the first to get a verified business profile — free, always.
               </p>
 
               <div className="space-y-4 mb-8">
@@ -105,6 +108,11 @@ export default function WaitlistPage() {
                       <span className="text-xs text-amber-600 font-semibold ml-auto">Coming Soon</span>
                     </div>
                   ))}
+                  <div className="flex items-center gap-2.5 pt-1 border-t border-border mt-2">
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground/30 flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground">Your city</span>
+                    <span className="text-xs text-muted-foreground font-semibold ml-auto">Register below</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -118,12 +126,12 @@ export default function WaitlistPage() {
                   </div>
                   <h2 className="text-xl font-extrabold text-foreground mb-2">You're on the list!</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    We'll notify you as soon as {BRAND.name} launches in your district. Keep an eye on your phone and email.
+                    We'll notify you as soon as {BRAND.name} launches in your city. Keep an eye on your phone and email.
                   </p>
                   <div className="mt-6 p-4 rounded-xl bg-muted/50 border border-border text-left">
                     <p className="text-xs text-muted-foreground mb-1">Registered as</p>
                     <p className="font-semibold text-sm text-foreground">{form.name}</p>
-                    <p className="text-xs text-muted-foreground">{form.district} · {form.category}</p>
+                    <p className="text-xs text-muted-foreground">{form.district} · {finalCategory}</p>
                   </div>
                 </div>
               ) : (
@@ -132,68 +140,59 @@ export default function WaitlistPage() {
 
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-1.5 block">Your Name</label>
-                    <input
-                      type="text"
-                      value={form.name}
-                      onChange={(e) => set("name", e.target.value)}
-                      placeholder="Full name"
-                      className={inputCls(!!errors.name)}
-                    />
+                    <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Full name" className={inputCls(!!errors.name)} />
                     {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
                   </div>
 
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-1.5 block">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) => set("phone", e.target.value)}
-                      placeholder="+91 98765 43210"
-                      className={inputCls(!!errors.phone)}
-                    />
+                    <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+91 98765 43210" className={inputCls(!!errors.phone)} />
                     {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                   </div>
 
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-1.5 block">Email Address</label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => set("email", e.target.value)}
-                      placeholder="you@example.com"
-                      className={inputCls(!!errors.email)}
-                    />
+                    <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className={inputCls(!!errors.email)} />
                     {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-foreground mb-1.5 block">Your District</label>
-                    <select
+                    <label className="text-sm font-semibold text-foreground mb-1.5 block">
+                      Your City / District
+                      <span className="text-muted-foreground font-normal ml-1 text-xs">(can be anywhere in India)</span>
+                    </label>
+                    <input
+                      type="text"
                       value={form.district}
                       onChange={(e) => set("district", e.target.value)}
+                      placeholder="e.g. Vapi, Surat, Bharuch, Ahmedabad..."
                       className={inputCls(!!errors.district)}
-                    >
-                      <option value="">Select district...</option>
-                      {ALL_DISTRICTS.map((d) => (
-                        <option key={d} value={d}>{d}{COMING_SOON_DISTRICTS.includes(d) ? " (Coming Soon)" : " (Live)"}</option>
-                      ))}
-                    </select>
+                    />
                     {errors.district && <p className="text-xs text-destructive mt-1">{errors.district}</p>}
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-foreground mb-1.5 block">Business Category</label>
-                    <select
-                      value={form.category}
-                      onChange={(e) => set("category", e.target.value)}
-                      className={inputCls(!!errors.category)}
-                    >
+                    <label className="text-sm font-semibold text-foreground mb-1.5 block">Business / Service Category</label>
+                    <select value={form.category} onChange={(e) => { set("category", e.target.value); set("customCategory", ""); }} className={inputCls(!!errors.category)}>
                       <option value="">Select category...</option>
                       {SERVICE_CATEGORIES.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}
+                      <option value="__other__">Other (not in the list)</option>
                     </select>
                     {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
+                    {form.category === "__other__" && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={form.customCategory}
+                          onChange={(e) => set("customCategory", e.target.value)}
+                          placeholder="e.g. Flower Shop, Bike Mechanic, Photography Studio..."
+                          className={inputCls(!!errors.customCategory)}
+                        />
+                        {errors.customCategory && <p className="text-xs text-destructive mt-1">{errors.customCategory}</p>}
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -203,13 +202,11 @@ export default function WaitlistPage() {
                   >
                     {submitting ? (
                       <span className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                    ) : (
-                      "Join the Waitlist"
-                    )}
+                    ) : "Join the Waitlist"}
                   </button>
 
                   <p className="text-xs text-muted-foreground text-center">
-                    No spam. We only contact you when your district goes live.
+                    No spam. We only contact you when your city goes live.
                   </p>
                 </div>
               )}

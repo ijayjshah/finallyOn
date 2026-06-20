@@ -445,8 +445,10 @@ interface AppContextType {
   logout: () => void;
   register: (data: Omit<User, "id" | "createdAt">) => { success: boolean; error?: string };
   updateUser: (id: string, data: Partial<User>) => void;
+  deleteUser: (id: string) => void;
   createProfile: (data: Omit<ServiceProfile, "id" | "createdAt">) => ServiceProfile;
   updateProfile: (id: string, data: Partial<ServiceProfile>) => void;
+  deleteProfile: (id: string) => void;
   getProfileByUserId: (userId: string) => ServiceProfile | undefined;
   getProfileById: (id: string) => ServiceProfile | undefined;
   addListing: (data: Omit<Listing, "id" | "createdAt">) => Listing;
@@ -552,6 +554,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCurrentUser((prev) => (prev?.id === id ? { ...prev, ...data } : prev));
   }, []);
 
+  const deleteUser = useCallback((id: string) => {
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setCurrentUser((prev) => {
+      if (prev?.id === id) {
+        localStorage.removeItem("fw_current_user_id");
+        return null;
+      }
+      return prev;
+    });
+  }, []);
+
   const createProfile = useCallback((data: Omit<ServiceProfile, "id" | "createdAt">) => {
     const profile: ServiceProfile = { ...data, id: uid(), createdAt: new Date().toISOString() };
     setProfiles((prev) => [...prev, profile]);
@@ -560,6 +573,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback((id: string, data: Partial<ServiceProfile>) => {
     setProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+  }, []);
+
+  const deleteProfile = useCallback((id: string) => {
+    setProfiles((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const getProfileByUserId = useCallback((userId: string) =>
@@ -605,8 +622,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       currentUser, users, profiles, listings, jobs,
-      login, logout, register, updateUser,
-      createProfile, updateProfile, getProfileByUserId, getProfileById,
+      login, logout, register, updateUser, deleteUser,
+      createProfile, updateProfile, deleteProfile, getProfileByUserId, getProfileById,
       addListing, updateListing, deleteListing, getListingsByUserId,
       addJob, updateJob, deleteJob, getJobsByUserId,
     }}>
