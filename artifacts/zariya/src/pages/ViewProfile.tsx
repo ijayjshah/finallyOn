@@ -2,7 +2,7 @@ import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Star, MapPin, Shield, Phone, Clock, CheckCircle2, Edit,
-  Briefcase, ChevronLeft, ChevronRight, MessageCircle, ExternalLink,
+  Briefcase, ChevronLeft, ChevronRight, MessageCircle, ExternalLink, Store, Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
@@ -35,8 +35,27 @@ export default function ViewProfile() {
 
   const waNumber = profile.whatsappNumber?.replace(/\D/g, "") || profile.phone?.replace(/\D/g, "");
   const waText = encodeURIComponent(
-    `Hi ${profile.name.split(" ")[0]}, I found your profile on FinallyOn. I'd like to inquire about your services.`
+    `Hi ${profile.name.split(" ")[0]}, I found your profile on FinallyOn. I'd like to inquire about your ${profile.profileType === "business" ? "business" : "services"}.`
   );
+
+  const isBusinessProfile = profile.profileType === "business";
+  const ProfileTypeIcon = isBusinessProfile ? Store : Wrench;
+
+  // Extract lat/lng from mapUrl if it's a Google Maps link for embed
+  const getMapEmbedUrl = (url: string) => {
+    if (!url) return null;
+    // For google maps q= format, build an embed URL
+    try {
+      const u = new URL(url);
+      const q = u.searchParams.get("q");
+      if (q) {
+        return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+      }
+    } catch {}
+    return null;
+  };
+
+  const mapEmbedUrl = profile.mapUrl ? getMapEmbedUrl(profile.mapUrl) : null;
 
   return (
     <AppLayout>
@@ -112,6 +131,12 @@ export default function ViewProfile() {
             <div className="p-5 rounded-2xl border border-border bg-card">
               <div className="flex items-start justify-between mb-3">
                 <div>
+                  <div className={`flex items-center gap-1.5 mb-1.5 px-2.5 py-1 rounded-full w-fit text-[10px] font-bold ${
+                    isBusinessProfile ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                  }`}>
+                    <ProfileTypeIcon className="w-3 h-3" />
+                    {isBusinessProfile ? "Business" : "Service Provider"}
+                  </div>
                   <h1 className="text-xl font-extrabold text-foreground">{profile.name}</h1>
                   <p className="text-sm font-semibold text-primary">{profile.category}</p>
                 </div>
@@ -135,7 +160,7 @@ export default function ViewProfile() {
                 <div className="flex items-center gap-2 text-sm">
                   <div className={`w-2 h-2 rounded-full ${profile.available ? "bg-emerald-500" : "bg-muted-foreground"}`} />
                   <span className={`font-medium text-sm ${profile.available ? "text-emerald-600" : "text-muted-foreground"}`}>
-                    {profile.available ? "Available for work" : "Currently unavailable"}
+                    {profile.available ? "Currently available" : "Currently unavailable"}
                   </span>
                 </div>
               </div>
@@ -204,7 +229,9 @@ export default function ViewProfile() {
                 transition={{ delay: 0.08, duration: 0.4 }}
                 className="p-6 rounded-2xl border border-border bg-card"
               >
-                <h2 className="font-bold text-base text-foreground mb-3">Specialisations</h2>
+                <h2 className="font-bold text-base text-foreground mb-3">
+                  {isBusinessProfile ? "Specialities" : "Specialisations"}
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {profile.tags.map((tag) => (
                     <span key={tag} className="px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-semibold border border-primary/15">
@@ -215,7 +242,7 @@ export default function ViewProfile() {
               </motion.div>
             )}
 
-            {/* Services */}
+            {/* Services / Offerings */}
             {profile.services.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -223,7 +250,9 @@ export default function ViewProfile() {
                 transition={{ delay: 0.12, duration: 0.4 }}
                 className="p-6 rounded-2xl border border-border bg-card"
               >
-                <h2 className="font-bold text-base text-foreground mb-4">Services & Pricing</h2>
+                <h2 className="font-bold text-base text-foreground mb-4">
+                  {isBusinessProfile ? "Products & Offerings" : "Services & Pricing"}
+                </h2>
                 <div className="space-y-3">
                   {profile.services.map((service) => (
                     <div key={service.id} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-muted/40 border border-border">
@@ -241,6 +270,59 @@ export default function ViewProfile() {
                       )}
                     </div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Location Map */}
+            {(profile.mapUrl || mapEmbedUrl) && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.14, duration: 0.4 }}
+                className="rounded-2xl border border-border bg-card overflow-hidden"
+              >
+                <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-sm text-foreground">Location</h2>
+                      <p className="text-xs text-muted-foreground">{profile.area}, Navsari, Gujarat</p>
+                    </div>
+                  </div>
+                  {profile.verified && (
+                    <div className="flex items-center gap-1 text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                      <Shield className="w-3 h-3" />
+                      Admin verified
+                    </div>
+                  )}
+                </div>
+                {mapEmbedUrl && (
+                  <div className="h-56 bg-muted">
+                    <iframe
+                      src={mapEmbedUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`${profile.name} location map`}
+                    />
+                  </div>
+                )}
+                <div className="px-6 py-3 border-t border-border">
+                  <a
+                    href={profile.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary font-semibold hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open in Google Maps
+                  </a>
                 </div>
               </motion.div>
             )}
@@ -282,26 +364,6 @@ export default function ViewProfile() {
                       </a>
                     </div>
                   </div>
-                )}
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Location</div>
-                    <div className="text-sm font-semibold text-foreground">{profile.area}, Navsari, Gujarat</div>
-                  </div>
-                </div>
-                {profile.mapUrl && (
-                  <a
-                    href={profile.mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-primary font-semibold hover:underline"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    View on Google Maps
-                  </a>
                 )}
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">

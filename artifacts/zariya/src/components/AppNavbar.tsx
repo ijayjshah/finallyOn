@@ -1,16 +1,50 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LayoutDashboard, Search, User, ListChecks, LogOut, PlusCircle, ChevronDown, Briefcase, Home } from "lucide-react";
+import {
+  Menu, X, LayoutDashboard, Search, User, ListChecks, LogOut,
+  PlusCircle, ChevronDown, Briefcase, Home, Store, Wrench, Users,
+} from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { BRAND } from "@/types";
+import { BRAND, UserType } from "@/types";
 
-const navLinks = [
-  { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
-  { label: "Discover", href: "/app/discover", icon: Search },
-  { label: "Jobs", href: "/app/jobs", icon: Briefcase },
-  { label: "My Listings", href: "/app/listings", icon: ListChecks },
-];
+type NavLink = { label: string; href: string; icon: React.ElementType };
+
+function getNavLinks(type: UserType, hasProfile: boolean): NavLink[] {
+  const base: NavLink[] = [
+    { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+    { label: "Discover Services", href: "/app/discover?tab=services", icon: Wrench },
+    { label: "Discover Businesses", href: "/app/discover?tab=businesses", icon: Store },
+    { label: "Jobs", href: "/app/jobs", icon: Briefcase },
+  ];
+
+  if (type === "user") {
+    return base;
+  }
+
+  if (type === "service_provider") {
+    return [
+      { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+      { label: "Discover", href: "/app/discover", icon: Search },
+      { label: "My Services", href: "/app/listings", icon: ListChecks },
+      { label: "Jobs", href: "/app/jobs", icon: Briefcase },
+    ];
+  }
+
+  // business_owner
+  return [
+    { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+    { label: "Discover", href: "/app/discover", icon: Search },
+    { label: "My Business", href: "/app/listings", icon: Store },
+    { label: "Jobs", href: "/app/jobs", icon: Briefcase },
+  ];
+}
+
+function getRoleLabel(type: UserType) {
+  if (type === "service_provider") return { label: "Service Provider", Icon: Wrench, color: "text-indigo-600" };
+  if (type === "business_owner") return { label: "Business Owner", Icon: Store, color: "text-amber-600" };
+  return { label: "Explorer", Icon: Users, color: "text-violet-600" };
+}
 
 const Logo = () => (
   <div className="flex items-center gap-2">
@@ -35,6 +69,10 @@ export default function AppNavbar() {
   const [location] = useLocation();
 
   const profile = currentUser ? getProfileByUserId(currentUser.id) : undefined;
+  const userType: UserType = currentUser?.type ?? "user";
+  const navLinks = getNavLinks(userType, !!profile);
+  const roleInfo = getRoleLabel(userType);
+  const RoleIcon = roleInfo.Icon;
 
   const handleNav = (href: string) => {
     navigate(href);
@@ -47,7 +85,17 @@ export default function AppNavbar() {
     navigate("/");
   };
 
-  const isActive = (href: string) => location === href;
+  const isActive = (href: string) => {
+    const base = href.split("?")[0];
+    return location === base || location.startsWith(base + "/");
+  };
+
+  const showListingCTA = userType === "service_provider" || userType === "business_owner";
+  const ctaLabel =
+    userType === "business_owner"
+      ? profile ? "Add Listing" : "Create Business Profile"
+      : profile ? "Add Listing" : "Create Service Profile";
+  const ctaHref = profile ? "/app/listings/add" : "/app/profile/create";
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
@@ -56,6 +104,7 @@ export default function AppNavbar() {
           <Logo />
         </button>
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
           {navLinks.map((link) => (
             <button
@@ -75,20 +124,22 @@ export default function AppNavbar() {
           <button
             onClick={() => handleNav("/")}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title="Go to homepage"
           >
             <Home className="w-4 h-4" />
             <span className="hidden lg:inline">Home</span>
           </button>
 
-          <button
-            onClick={() => handleNav(profile ? "/app/listings/add" : "/app/profile/create")}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/8 transition-colors"
-          >
-            <PlusCircle className="w-4 h-4" />
-            {profile ? "Add Listing" : "Create Profile"}
-          </button>
+          {showListingCTA && (
+            <button
+              onClick={() => handleNav(ctaHref)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/8 transition-colors"
+            >
+              <PlusCircle className="w-4 h-4" />
+              {ctaLabel}
+            </button>
+          )}
 
+          {/* User menu */}
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -108,12 +159,18 @@ export default function AppNavbar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-1.5 w-52 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
                 >
                   <div className="p-3 border-b border-border">
                     <div className="text-sm font-bold text-foreground">{currentUser?.name}</div>
                     <div className="text-xs text-muted-foreground">{currentUser?.email}</div>
-                    <div className="text-xs text-primary font-semibold mt-0.5">{currentUser?.district || currentUser?.city}</div>
+                    <div className={`text-xs font-semibold mt-1 flex items-center gap-1 ${roleInfo.color}`}>
+                      <RoleIcon className="w-3 h-3" />
+                      {roleInfo.label}
+                    </div>
+                    {currentUser?.serviceCategory && (
+                      <div className="text-xs text-muted-foreground mt-0.5">{currentUser.serviceCategory}</div>
+                    )}
                   </div>
                   <div className="p-1.5">
                     <button onClick={() => handleNav("/")} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors">
@@ -127,13 +184,15 @@ export default function AppNavbar() {
                       <User className="w-4 h-4 text-muted-foreground" />
                       {profile ? "View Profile" : "Create Profile"}
                     </button>
-                    <button
-                      onClick={() => handleNav("/app/jobs/post")}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
-                    >
-                      <Briefcase className="w-4 h-4 text-muted-foreground" />
-                      Post a Job
-                    </button>
+                    {showListingCTA && (
+                      <button
+                        onClick={() => handleNav("/app/jobs/post")}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-sm text-foreground text-left transition-colors"
+                      >
+                        <Briefcase className="w-4 h-4 text-muted-foreground" />
+                        Post a Job
+                      </button>
+                    )}
                     <div className="my-1 border-t border-border" />
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-sm text-destructive text-left transition-colors">
                       <LogOut className="w-4 h-4" />
@@ -151,6 +210,7 @@ export default function AppNavbar() {
         </button>
       </div>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -160,6 +220,12 @@ export default function AppNavbar() {
             className="md:hidden border-t border-border bg-background overflow-hidden"
           >
             <div className="px-4 py-4 space-y-1">
+              {/* Role badge */}
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg mb-2 text-xs font-semibold ${roleInfo.color} bg-muted`}>
+                <RoleIcon className="w-3.5 h-3.5" />
+                {roleInfo.label}
+                {currentUser?.serviceCategory && <span className="font-normal text-muted-foreground">· {currentUser.serviceCategory}</span>}
+              </div>
               {navLinks.map((link) => (
                 <button
                   key={link.href}
@@ -177,13 +243,15 @@ export default function AppNavbar() {
                 <Home className="w-4 h-4 text-muted-foreground" />
                 Go to Homepage
               </button>
-              <button
-                onClick={() => handleNav(profile ? "/app/listings/add" : "/app/profile/create")}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/8 transition-colors mt-1"
-              >
-                <PlusCircle className="w-4 h-4" />
-                {profile ? "Add Listing" : "Create Profile"}
-              </button>
+              {showListingCTA && (
+                <button
+                  onClick={() => handleNav(ctaHref)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/8 transition-colors mt-1"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  {ctaLabel}
+                </button>
+              )}
               <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">
                 <LogOut className="w-4 h-4" />
                 Sign Out

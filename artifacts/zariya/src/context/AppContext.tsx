@@ -16,6 +16,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo_user",
     name: "Ramesh Patel",
     category: "Electrician",
+    profileType: "service",
     city: "Navsari",
     area: "Navsari City",
     district: "Navsari",
@@ -49,6 +50,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo2_user",
     name: "Priya Shah",
     category: "Beautician",
+    profileType: "service",
     city: "Navsari",
     area: "Jalalpore",
     district: "Navsari",
@@ -81,6 +83,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo3_user",
     name: "Mohammed Shaikh",
     category: "Plumber",
+    profileType: "service",
     city: "Navsari",
     area: "Bilimora",
     district: "Navsari",
@@ -111,6 +114,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo4_user",
     name: "Kavita Ben Desai",
     category: "Home Chef / Tiffin Service",
+    profileType: "service",
     city: "Navsari",
     area: "Gandevi",
     district: "Navsari",
@@ -146,6 +150,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo5_user",
     name: "Jayesh Desai",
     category: "Home Tutor",
+    profileType: "service",
     city: "Navsari",
     area: "Chikhli",
     district: "Navsari",
@@ -177,6 +182,7 @@ const DEMO_PROFILES: ServiceProfile[] = [
     userId: "demo6_user",
     name: "Hina Trivedi",
     category: "Mehendi Artist",
+    profileType: "service",
     city: "Navsari",
     area: "Navsari City",
     district: "Navsari",
@@ -203,6 +209,71 @@ const DEMO_PROFILES: ServiceProfile[] = [
     tags: ["Bridal", "Arabic", "Rajasthani", "Festive"],
     approvalStatus: "approved",
     createdAt: "2025-01-22T10:00:00Z",
+  },
+  {
+    id: "prof_007",
+    userId: "biz_demo1",
+    name: "Mehta General Store",
+    category: "Grocery / Kirana",
+    profileType: "business",
+    city: "Navsari",
+    area: "Navsari City",
+    district: "Navsari",
+    description: "Family-run grocery and kirana shop in Navsari City serving the neighbourhood for 20+ years. Wide range of daily essentials, pulses, spices, and snacks. Home delivery available within 3 km.",
+    photos: [
+      seedPhoto("#854d0e", "Shop Front"),
+      seedPhoto("#a16207", "Grocery Aisle"),
+      seedPhoto("#ca8a04", "Fresh Produce"),
+    ],
+    services: [
+      { id: uid(), name: "Home Delivery (min ₹200)", price: "Free delivery", description: "Within 3 km radius" },
+      { id: uid(), name: "Bulk / Monthly Orders", price: "5% discount", description: "For regular households" },
+    ],
+    rating: 4.6,
+    reviewCount: 312,
+    experience: "20+ years",
+    phone: "+91 94270 33001",
+    whatsappNumber: "919427033001",
+    mapUrl: "https://maps.google.com/?q=Navsari+City",
+    verified: true,
+    available: true,
+    tags: ["Grocery", "Kirana", "Home Delivery", "Pulses", "Spices"],
+    approvalStatus: "approved",
+    deliveryAvailable: true,
+    pickupAvailable: true,
+    createdAt: "2025-01-25T10:00:00Z",
+  },
+  {
+    id: "prof_008",
+    userId: "biz_demo2",
+    name: "Patel Pharmacy",
+    category: "Pharmacy",
+    profileType: "business",
+    city: "Navsari",
+    area: "Jalalpore",
+    district: "Navsari",
+    description: "Registered pharmacy in Jalalpore, Navsari. Stocking all prescription and OTC medicines, health supplements, and baby care products. Experienced pharmacist on duty.",
+    photos: [
+      seedPhoto("#0f766e", "Pharmacy Counter"),
+      seedPhoto("#0d9488", "Medicine Racks"),
+    ],
+    services: [
+      { id: uid(), name: "Prescription Medicines", price: "MRP", description: "All brands available or sourced within 24hrs" },
+      { id: uid(), name: "Health Supplements", price: "MRP", description: "Vitamins, protein, immunity boosters" },
+    ],
+    rating: 4.7,
+    reviewCount: 198,
+    experience: "12 years",
+    phone: "+91 94270 33002",
+    whatsappNumber: "919427033002",
+    mapUrl: "https://maps.google.com/?q=Jalalpore+Navsari",
+    verified: true,
+    available: true,
+    tags: ["Medicines", "Pharmacy", "Health", "OTC"],
+    approvalStatus: "approved",
+    deliveryAvailable: false,
+    pickupAvailable: true,
+    createdAt: "2025-01-28T10:00:00Z",
   },
 ];
 
@@ -357,7 +428,7 @@ const SEED_USERS: User[] = [
     password: "demo123",
     phone: "+91 99999 00000",
     whatsappNumber: "919999900000",
-    type: "customer",
+    type: "user",
     city: "Navsari",
     district: "Navsari",
     createdAt: "2025-01-01T00:00:00Z",
@@ -373,6 +444,7 @@ interface AppContextType {
   login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   register: (data: Omit<User, "id" | "createdAt">) => { success: boolean; error?: string };
+  updateUser: (id: string, data: Partial<User>) => void;
   createProfile: (data: Omit<ServiceProfile, "id" | "createdAt">) => ServiceProfile;
   updateProfile: (id: string, data: Partial<ServiceProfile>) => void;
   getProfileByUserId: (userId: string) => ServiceProfile | undefined;
@@ -429,7 +501,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       save("fw_profiles", DEMO_PROFILES);
       return DEMO_PROFILES;
     }
-    return stored;
+    // Backfill profileType for legacy profiles missing the field
+    return stored.map((p) => ({ profileType: "service" as const, ...p }));
   });
 
   const [listings, setListings] = useState<Listing[]>(() =>
@@ -473,6 +546,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("fw_current_user_id", newUser.id);
     return { success: true };
   }, [users]);
+
+  const updateUser = useCallback((id: string, data: Partial<User>) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...data } : u)));
+    setCurrentUser((prev) => (prev?.id === id ? { ...prev, ...data } : prev));
+  }, []);
 
   const createProfile = useCallback((data: Omit<ServiceProfile, "id" | "createdAt">) => {
     const profile: ServiceProfile = { ...data, id: uid(), createdAt: new Date().toISOString() };
@@ -527,7 +605,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       currentUser, users, profiles, listings, jobs,
-      login, logout, register,
+      login, logout, register, updateUser,
       createProfile, updateProfile, getProfileByUserId, getProfileById,
       addListing, updateListing, deleteListing, getListingsByUserId,
       addJob, updateJob, deleteJob, getJobsByUserId,

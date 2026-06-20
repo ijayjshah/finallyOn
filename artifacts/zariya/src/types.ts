@@ -1,4 +1,4 @@
-export type UserType = 'worker' | 'customer' | 'business';
+export type UserType = 'user' | 'service_provider' | 'business_owner';
 
 export interface User {
   id: string;
@@ -8,6 +8,7 @@ export interface User {
   phone: string;
   whatsappNumber: string;
   type: UserType;
+  serviceCategory?: string;
   city: string;
   district: string;
   createdAt: string;
@@ -25,6 +26,7 @@ export interface ServiceProfile {
   userId: string;
   name: string;
   category: string;
+  profileType: 'service' | 'business';
   city: string;
   area: string;
   district: string;
@@ -108,7 +110,7 @@ export const EMPLOYMENT_TYPES = [
   'Full-time', 'Part-time', 'Contract', 'Daily Wage', 'Seasonal',
 ];
 
-export const SERVICE_CATEGORIES = [
+export const SERVICE_PROVIDER_CATEGORIES = [
   'Electrician', 'Plumber', 'Carpenter', 'Painter',
   'Tailor / Dress Maker', 'Beautician', 'Mehendi Artist',
   'Home Chef / Tiffin Service', 'Baker / Confectioner',
@@ -117,9 +119,18 @@ export const SERVICE_CATEGORIES = [
   'Yoga / Fitness Trainer', 'Cleaning Service', 'Pest Control',
   'Vehicle Driver', 'Security Guard', 'Gardener', 'Catering Service',
   'Massage Therapist', 'Computer Trainer', 'Astrologer / Vastu Consultant',
-  'Jewellery Shop', 'Clothing & Garments', 'Electronics Store',
-  'Grocery / Kirana', 'Pharmacy', 'Hardware Store', 'Furniture Shop',
 ];
+
+export const BUSINESS_CATEGORIES = [
+  'Grocery / Kirana', 'Pharmacy', 'Hardware Store', 'Furniture Shop',
+  'Jewellery Shop', 'Clothing & Garments', 'Electronics Store',
+  'Restaurant / Dhaba', 'Bakery / Sweet Shop', 'Stationery Shop',
+  'Book Store', 'Mobile Shop', 'Salon / Parlour', 'Gym / Fitness Centre',
+  'Medical Clinic', 'Coaching Institute', 'General Store',
+  'Automobile Parts', 'Textiles / Fabric Shop', 'Toys & Games Store',
+];
+
+export const SERVICE_CATEGORIES = [...SERVICE_PROVIDER_CATEGORIES, ...BUSINESS_CATEGORIES];
 
 export const PRODUCT_MAX = 25;
 

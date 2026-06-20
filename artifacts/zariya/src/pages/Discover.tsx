@@ -1,52 +1,65 @@
 import { useState, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
-import { Search, MapPin, Star, Shield, Filter, X, MessageCircle, Phone } from "lucide-react";
+import { Search, MapPin, Star, Shield, Filter, X, MessageCircle, Phone, Wrench, Store } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
-import { NAVSARI_AREAS, SERVICE_CATEGORIES } from "@/types";
+import { NAVSARI_AREAS, SERVICE_PROVIDER_CATEGORIES, BUSINESS_CATEGORIES } from "@/types";
+
+type TabType = "services" | "businesses";
 
 export default function Discover() {
   const [, navigate] = useLocation();
+  const search = useSearch();
   const { profiles } = useApp();
 
-  const [search, setSearch] = useState("");
+  const initialTab: TabType = search.includes("tab=businesses") ? "businesses" : "services";
+  const [tab, setTab] = useState<TabType>(initialTab);
+  const [searchText, setSearchText] = useState("");
   const [selectedArea, setSelectedArea] = useState("All Areas");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
 
   const approvedProfiles = profiles.filter((p) => p.approvalStatus === "approved");
+  const categoryList = tab === "services" ? SERVICE_PROVIDER_CATEGORIES : BUSINESS_CATEGORIES;
 
   const filtered = useMemo(() => {
     return approvedProfiles.filter((p) => {
+      const matchTab = tab === "services" ? p.profileType !== "business" : p.profileType === "business";
       const matchArea = selectedArea === "All Areas" || p.area === selectedArea;
-      const matchCat = selectedCategory === "All Categories" || p.category === selectedCategory;
+      const matchCat = selectedCategory === "All" || p.category === selectedCategory;
       const matchSearch =
-        !search.trim() ||
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.category.toLowerCase().includes(search.toLowerCase()) ||
-        p.area.toLowerCase().includes(search.toLowerCase()) ||
-        p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+        !searchText.trim() ||
+        p.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchText.toLowerCase()) ||
+        p.area.toLowerCase().includes(searchText.toLowerCase()) ||
+        p.tags.some((t) => t.toLowerCase().includes(searchText.toLowerCase()));
       const matchVerified = !verifiedOnly || p.verified;
       const matchAvailable = !availableOnly || p.available;
-      return matchArea && matchCat && matchSearch && matchVerified && matchAvailable;
+      return matchTab && matchArea && matchCat && matchSearch && matchVerified && matchAvailable;
     });
-  }, [approvedProfiles, search, selectedArea, selectedCategory, verifiedOnly, availableOnly]);
+  }, [approvedProfiles, tab, searchText, selectedArea, selectedCategory, verifiedOnly, availableOnly]);
 
   const clearFilters = () => {
-    setSearch("");
+    setSearchText("");
     setSelectedArea("All Areas");
-    setSelectedCategory("All Categories");
+    setSelectedCategory("All");
     setVerifiedOnly(false);
     setAvailableOnly(false);
   };
 
+  const switchTab = (t: TabType) => {
+    setTab(t);
+    setSelectedCategory("All");
+    clearFilters();
+  };
+
   const hasActiveFilters =
-    search ||
+    searchText ||
     selectedArea !== "All Areas" ||
-    selectedCategory !== "All Categories" ||
+    selectedCategory !== "All" ||
     verifiedOnly ||
     availableOnly;
 
@@ -64,8 +77,39 @@ export default function Discover() {
             <MapPin className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold text-primary uppercase tracking-wider">Navsari District</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-1">Discover Local Services</h1>
-          <p className="text-muted-foreground text-sm">Find verified workers and businesses near you</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-4">Discover Local</h1>
+
+          {/* Tab switcher */}
+          <div className="flex gap-2 p-1 bg-muted/60 rounded-2xl w-fit">
+            <button
+              onClick={() => switchTab("services")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                tab === "services"
+                  ? "bg-card text-primary shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Wrench className="w-4 h-4" />
+              Services
+            </button>
+            <button
+              onClick={() => switchTab("businesses")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                tab === "businesses"
+                  ? "bg-card text-primary shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Store className="w-4 h-4" />
+              Businesses
+            </button>
+          </div>
+
+          <p className="text-muted-foreground text-sm mt-3">
+            {tab === "services"
+              ? "Find skilled workers — electricians, tutors, beauticians and more"
+              : "Browse local shops, restaurants, clinics and stores near you"}
+          </p>
         </motion.div>
 
         {/* Search & filters */}
@@ -80,9 +124,9 @@ export default function Discover() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, service, area..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder={tab === "services" ? "Search by name, skill, area..." : "Search by name, shop type, area..."}
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
@@ -118,8 +162,8 @@ export default function Discover() {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground outline-none focus:border-primary transition-all"
                 >
-                  <option>All Categories</option>
-                  {SERVICE_CATEGORIES.map((c) => (
+                  <option value="All">All {tab === "services" ? "Services" : "Business Types"}</option>
+                  {categoryList.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
@@ -156,11 +200,30 @@ export default function Discover() {
             </motion.div>
           )}
 
+          {/* Category chips */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setSelectedCategory("All")}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedCategory === "All" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+            >
+              All
+            </button>
+            {categoryList.slice(0, 8).map((c) => (
+              <button
+                key={c}
+                onClick={() => setSelectedCategory(c)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedCategory === c ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+
           {/* Area chips */}
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedArea("All Areas")}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === "All Areas" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === "All Areas" ? "bg-foreground text-background border-foreground" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
             >
               All Areas
             </button>
@@ -168,7 +231,7 @@ export default function Discover() {
               <button
                 key={a}
                 onClick={() => setSelectedArea(a)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === a ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${selectedArea === a ? "bg-foreground text-background border-foreground" : "bg-card border-border text-muted-foreground hover:text-foreground"}`}
               >
                 {a}
               </button>
@@ -178,7 +241,7 @@ export default function Discover() {
 
         {/* Results count */}
         <div className="text-sm text-muted-foreground mb-5">
-          {filtered.length} provider{filtered.length !== 1 ? "s" : ""} found in Navsari
+          {filtered.length} {tab === "services" ? "service provider" : "business"}{filtered.length !== 1 ? "s" : ""} found in Navsari
           {hasActiveFilters && (
             <button onClick={clearFilters} className="ml-2 text-primary font-semibold hover:underline">
               Clear filters
@@ -186,20 +249,24 @@ export default function Discover() {
           )}
         </div>
 
-        {/* Profile cards grid */}
+        {/* Cards grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-              <Search className="w-7 h-7 text-muted-foreground" />
+              {tab === "services" ? <Wrench className="w-7 h-7 text-muted-foreground" /> : <Store className="w-7 h-7 text-muted-foreground" />}
             </div>
             <h3 className="font-bold text-lg text-foreground mb-2">No results found</h3>
-            <p className="text-muted-foreground text-sm">Try adjusting your search or filters.</p>
-            <button
-              onClick={clearFilters}
-              className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Clear Filters
-            </button>
+            <p className="text-muted-foreground text-sm">
+              {hasActiveFilters ? "Try adjusting your filters." : `No ${tab} listed in this area yet.`}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -211,7 +278,6 @@ export default function Discover() {
                 transition={{ delay: i * 0.05, duration: 0.4 }}
               >
                 <div className="rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden group">
-                  {/* Photo strip */}
                   <button
                     onClick={() => navigate(`/app/profile/${profile.id}`)}
                     className="w-full text-left"
@@ -228,6 +294,15 @@ export default function Discover() {
                           <span className="text-5xl font-black text-primary/20">{profile.name.charAt(0)}</span>
                         </div>
                       )}
+                      {/* Profile type badge */}
+                      <div className={`absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full shadow-sm text-[10px] font-bold ${
+                        profile.profileType === "business"
+                          ? "bg-amber-500 text-white"
+                          : "bg-indigo-500 text-white"
+                      }`}>
+                        {profile.profileType === "business" ? <Store className="w-3 h-3" /> : <Wrench className="w-3 h-3" />}
+                        {profile.profileType === "business" ? "Business" : "Service"}
+                      </div>
                       {profile.verified && (
                         <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur border border-border shadow-sm">
                           <Shield className="w-3 h-3 text-primary" />
@@ -235,7 +310,7 @@ export default function Discover() {
                         </div>
                       )}
                       {profile.available && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500 shadow-sm">
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500 shadow-sm">
                           <div className="w-1.5 h-1.5 rounded-full bg-white" />
                           <span className="text-[10px] font-bold text-white">Available</span>
                         </div>
@@ -272,11 +347,10 @@ export default function Discover() {
                     </div>
                   </button>
 
-                  {/* Action row */}
                   <div className="px-4 pb-4 flex gap-2">
                     {profile.whatsappNumber ? (
                       <a
-                        href={`https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${profile.name.split(" ")[0]}, I found you on FinallyOn. I'd like to inquire about your services.`)}`}
+                        href={`https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${profile.name.split(" ")[0]}, I found you on FinallyOn. I'd like to inquire about your ${profile.profileType === "business" ? "business" : "services"}.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
