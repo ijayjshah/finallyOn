@@ -33,8 +33,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
-    const result = login(email, password);
+    const result = await login(email, password);
     setLoading(false);
     if (result.success) {
       navigate("/app/dashboard");
@@ -65,22 +64,7 @@ export default function Login() {
           <h1 className="text-xl font-extrabold text-foreground text-center mb-1">Welcome back</h1>
           <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your {BRAND.name} account</p>
 
-          {/* Demo hint */}
-          <div className="mb-5 p-3 rounded-xl bg-primary/8 border border-primary/15">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-primary mb-0.5">Try the demo account</div>
-                <div className="text-xs text-muted-foreground">demo@finallyon.in · demo123</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setEmail("demo@finallyon.in"); setPassword("demo123"); }}
-                className="text-xs font-bold text-primary-foreground bg-primary px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Fill
-              </button>
-            </div>
-          </div>
+      
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

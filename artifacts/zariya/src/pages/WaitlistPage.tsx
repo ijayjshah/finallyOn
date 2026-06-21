@@ -4,6 +4,7 @@ import { CheckCircle2, Zap, Users, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BRAND, SERVICE_CATEGORIES, COMING_SOON_DISTRICTS } from "@/types";
+import { api } from "@/lib/api";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -40,15 +41,17 @@ export default function WaitlistPage() {
   const handleSubmit = async () => {
     if (!validate()) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    try {
-      const leads = JSON.parse(localStorage.getItem("fo_waitlist") ?? "[]");
-      const finalCategory = form.category === "__other__" ? form.customCategory.trim() : form.category;
-      leads.push({ ...form, category: finalCategory, id: Date.now().toString(), createdAt: new Date().toISOString() });
-      localStorage.setItem("fo_waitlist", JSON.stringify(leads));
-    } catch {}
+    const finalCategory = form.category === "__other__" ? form.customCategory.trim() : form.category;
+    const res = await api.submitWaitlist({
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      district: form.district.trim(),
+      category: finalCategory,
+      customCategory: form.category === "__other__" ? form.customCategory.trim() : undefined,
+    });
     setSubmitting(false);
-    setSubmitted(true);
+    if (!res.error) setSubmitted(true);
   };
 
   const benefits = [

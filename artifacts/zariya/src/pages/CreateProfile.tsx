@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2, MapPin, MessageCircle, Clock, Upload } from "lucide-react";
@@ -41,12 +41,6 @@ export default function CreateProfile() {
   const [, navigate] = useLocation();
   const { currentUser, createProfile, getProfileByUserId } = useApp();
 
-  const existingProfile = currentUser ? getProfileByUserId(currentUser.id) : undefined;
-  if (existingProfile) {
-    navigate(`/app/profile/${existingProfile.id}`);
-    return null;
-  }
-
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     name: currentUser?.name ?? "",
@@ -69,6 +63,17 @@ export default function CreateProfile() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const justCreatedRef = useRef(false);
+
+  const existingProfile = currentUser ? getProfileByUserId(currentUser.id) : undefined;
+
+  useEffect(() => {
+    if (submitted || submitting || justCreatedRef.current) return;
+    if (existingProfile) {
+      navigate(`/app/profile/${existingProfile.id}`);
+    }
+  }, [existingProfile, submitted, submitting, navigate]);
 
   const set = (k: string, v: unknown) => {
     setForm((f) => ({ ...f, [k]: v }));
@@ -109,17 +114,21 @@ export default function CreateProfile() {
   const handleSubmit = async () => {
     if (!currentUser) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    createProfile({
+    setSubmitError("");
+    justCreatedRef.current = true;
+
+    const profile = await createProfile({
       userId: currentUser.id,
       name: form.name.trim(),
       category: form.category === "__other__" ? form.customCategory.trim() : form.category,
+      profileType: currentUser.type === "business_owner" ? "business" : "service",
       city: "Navsari",
       area: form.area,
       district: "Navsari",
       phone: form.phone.trim(),
       whatsappNumber: form.whatsappNumber.trim(),
       mapUrl: form.mapUrl.trim(),
+      resumeUrl: form.resumeNote.trim() || undefined,
       experience: form.experience,
       description: form.description.trim(),
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -133,11 +142,27 @@ export default function CreateProfile() {
       verified: false,
       approvalStatus: "pending",
     });
+
+    if (profile) {
+      setSubmitted(true);
+    } else {
+      justCreatedRef.current = false;
+      setSubmitError("Could not save your profile. Please try again.");
+    }
     setSubmitting(false);
-    setSubmitted(true);
   };
 
   const expOptions = ["Less than 1 year", "1–2 years", "3–5 years", "6–10 years", "More than 10 years"];
+
+  if (!submitted && !submitting && existingProfile) {
+    return (
+      <AppLayout hideFooter>
+        <div className="max-w-xl mx-auto px-4 py-16 text-center text-sm text-muted-foreground">
+          Redirecting to your profile…
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (submitted) {
     return (
@@ -444,7 +469,11 @@ export default function CreateProfile() {
         </motion.div>
 
         {/* Nav buttons */}
-        <div className="flex items-center justify-between mt-8 pt-5 border-t border-border">
+        <div className="flex flex-col gap-3 mt-8 pt-5 border-t border-border">
+          {submitError && (
+            <p className="text-sm text-destructive">{submitError}</p>
+          )}
+          <div className="flex items-center justify-between">
           <button
             onClick={back}
             disabled={step === 0}
@@ -475,6 +504,7 @@ export default function CreateProfile() {
               )}
             </button>
           )}
+          </div>
         </div>
       </div>
     </AppLayout>

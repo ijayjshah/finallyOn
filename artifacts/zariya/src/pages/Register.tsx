@@ -120,10 +120,9 @@ export default function Register() {
     e.preventDefault();
     if (!validateStep2()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
     const finalCategory =
       form.serviceCategory === "__other__" ? form.customCategory.trim() : form.serviceCategory;
-    const result = register({
+    const result = await register({
       name: form.name.trim(),
       email: form.email.trim(),
       password: form.password,

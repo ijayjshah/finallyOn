@@ -107,9 +107,9 @@ export default function AddEditJob() {
     };
 
     if (isEdit && editId) {
-      updateJob(editId, data);
+      await updateJob(editId, data);
     } else {
-      addJob(data);
+      await addJob(data);
     }
 
     setSaving(false);

@@ -4,13 +4,15 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   phone: string;
   whatsappNumber: string;
   type: UserType;
   serviceCategory?: string;
   city: string;
   district: string;
+  role?: 'user' | 'admin';
+  onboardingCompleted?: boolean;
   createdAt: string;
 }
 

@@ -81,7 +81,7 @@ export default function AppNavbar() {
   };
 
   const handleLogout = () => {
-    logout();
+    void logout();
     navigate("/");
   };
 

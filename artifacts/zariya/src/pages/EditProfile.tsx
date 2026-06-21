@@ -104,8 +104,7 @@ export default function EditProfile() {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    updateProfile(profile.id, {
+    await updateProfile(profile.id, {
       name: form.name.trim(),
       category: form.category === "__other__" ? form.customCategory.trim() : form.category,
       city: form.city,

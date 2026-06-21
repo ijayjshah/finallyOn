@@ -95,7 +95,6 @@ export default function AddEditListing() {
     if (!validate() || !currentUser) return;
     if (form.type === "product" && !canAddProduct) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
 
     const data = {
       userId: currentUser.id,
@@ -117,9 +116,9 @@ export default function AddEditListing() {
     };
 
     if (isEdit && editId) {
-      updateListing(editId, data);
+      await updateListing(editId, data);
     } else {
-      addListing(data);
+      await addListing(data);
     }
 
     setSaving(false);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Users, Package, Briefcase, BarChart3, CheckCircle2, XCircle,
@@ -8,10 +8,8 @@ import {
   ImageIcon, AlertTriangle, MessageCircle,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
 import { BRAND, SERVICE_CATEGORIES, UserType } from "@/types";
-
-const ADMIN_EMAIL = "admin@finallyon.in";
-const ADMIN_PASSWORD = "admin123";
 
 type AdminTab = "overview" | "users" | "profiles" | "listings" | "jobs" | "waitlist";
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
@@ -68,17 +66,12 @@ function getMapEmbedUrl(url: string) {
 }
 
 export default function AdminPage() {
-  const { users, profiles, listings, jobs, updateUser, updateProfile, updateListing, updateJob, deleteUser, deleteProfile, deleteListing, deleteJob } = useApp();
+  const { currentUser, loading, users, profiles, listings, jobs, logout, updateUser, updateProfile, updateListing, updateJob, deleteUser, deleteProfile, deleteListing, deleteJob } = useApp();
 
-  const [authed, setAuthed] = useState(() => {
-    try { return localStorage.getItem("fo_admin_auth") === "1"; } catch { return false; }
-  });
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
   const [tab, setTab] = useState<AdminTab>("overview");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [waitlist, setWaitlist] = useState<Array<Record<string, string>>>([]);
 
   // User editing
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -95,24 +88,14 @@ export default function AdminPage() {
   // Job detail panel
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  // Waitlist
-  const [waitlist] = useState<Array<Record<string, string>>>(() => {
-    try { return JSON.parse(localStorage.getItem("fo_waitlist") ?? "[]"); } catch { return []; }
-  });
+  useEffect(() => {
+    if (currentUser?.role !== "admin") return;
+    void api.admin.getWaitlist().then((res) => {
+      if (res.data) setWaitlist(res.data.leads as Array<Record<string, string>>);
+    });
+  }, [currentUser?.role]);
 
-  const handleLogin = () => {
-    if (email.trim() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      localStorage.setItem("fo_admin_auth", "1");
-      setAuthed(true);
-    } else {
-      setLoginError("Invalid admin credentials.");
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("fo_admin_auth");
-    setAuthed(false);
-  };
+  const handleLogout = () => { void logout(); };
 
   const pendingProfiles = profiles.filter((p) => p.approvalStatus === "pending");
   const pendingListings = listings.filter((l) => l.approvalStatus === "pending");
@@ -171,34 +154,40 @@ export default function AdminPage() {
     { id: "waitlist", label: "Waitlist", icon: FileText, badge: waitlist.length || undefined },
   ];
 
-  if (!authed) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-sm">
-          <div className="flex items-center gap-3 justify-center mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <div className="font-extrabold text-foreground">{BRAND.name} Admin</div>
-              <div className="text-xs text-muted-foreground">Restricted Access</div>
-            </div>
-          </div>
-          <div className="p-8 rounded-3xl border border-border bg-card shadow-sm space-y-4">
-            <h1 className="text-lg font-extrabold text-foreground">Admin Login</h1>
-            <div>
-              <label className="text-sm font-semibold text-foreground mb-1.5 block">Email</label>
-              <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setLoginError(""); }} onKeyDown={(e) => e.key === "Enter" && handleLogin()} placeholder="admin@finallyon.in" className={inputCls} />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-foreground mb-1.5 block">Password</label>
-              <input type="password" value={password} onChange={(e) => { setPassword(e.target.value); setLoginError(""); }} onKeyDown={(e) => e.key === "Enter" && handleLogin()} placeholder="••••••••" className={inputCls} />
-            </div>
-            {loginError && <p className="text-xs text-destructive">{loginError}</p>}
-            <button onClick={handleLogin} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity">Sign In</button>
-            <p className="text-xs text-muted-foreground text-center">admin@finallyon.in / admin123</p>
-          </div>
-        </motion.div>
+        <div className="text-center space-y-4">
+          <Shield className="w-10 h-10 text-primary mx-auto" />
+          <h1 className="text-lg font-extrabold text-foreground">Admin Login Required</h1>
+          <p className="text-sm text-muted-foreground">Sign in with an admin account to access this panel.</p>
+          <a href="/login" className="inline-block px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90">
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentUser.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <Shield className="w-10 h-10 text-destructive mx-auto" />
+          <h1 className="text-lg font-extrabold text-foreground">Access Denied</h1>
+          <p className="text-sm text-muted-foreground">Your account does not have admin privileges.</p>
+          <a href="/app/dashboard" className="inline-block px-5 py-2.5 rounded-xl border border-border text-sm font-bold hover:bg-muted">
+            Back to Dashboard
+          </a>
+        </div>
       </div>
     );
   }

@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Briefcase, Package, MessageCircle, Shield, Star, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
 import { BRAND } from "@/types";
-
-const STORAGE_KEY = "fo_onboarded";
 
 const STEPS = [
   {
@@ -52,16 +51,11 @@ export default function OnboardingWalkthrough() {
 
   useEffect(() => {
     if (!currentUser) return;
-    try {
-      const done = localStorage.getItem(`${STORAGE_KEY}_${currentUser.id}`);
-      if (!done) setVisible(true);
-    } catch {}
-  }, [currentUser?.id]);
+    if (!currentUser.onboardingCompleted) setVisible(true);
+  }, [currentUser?.id, currentUser?.onboardingCompleted]);
 
   const finish = () => {
-    if (currentUser) {
-      try { localStorage.setItem(`${STORAGE_KEY}_${currentUser.id}`, "1"); } catch {}
-    }
+    void api.completeOnboarding();
     setVisible(false);
   };
 

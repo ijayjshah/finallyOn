@@ -1,20 +1,49 @@
+import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Star, MapPin, Shield, Phone, Clock, CheckCircle2, Edit,
   Briefcase, ChevronLeft, ChevronRight, MessageCircle, ExternalLink, Store, Wrench,
 } from "lucide-react";
-import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { api } from "@/lib/api";
+import type { ServiceProfile } from "@/types";
 
 export default function ViewProfile() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { getProfileById, currentUser } = useApp();
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [profile, setProfile] = useState<ServiceProfile | null | undefined>(
+    () => getProfileById(params.id) ?? undefined,
+  );
+  const [loading, setLoading] = useState(!getProfileById(params.id));
 
-  const profile = getProfileById(params.id);
+  useEffect(() => {
+    const cached = getProfileById(params.id);
+    if (cached) {
+      setProfile(cached);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    void api.getProfile(params.id).then((res) => {
+      if (cancelled) return;
+      setProfile(res.data?.profile ?? null);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [params.id, getProfileById]);
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center text-muted-foreground text-sm">Loading profile…</div>
+      </AppLayout>
+    );
+  }
+
   if (!profile) {
     return (
       <AppLayout>
