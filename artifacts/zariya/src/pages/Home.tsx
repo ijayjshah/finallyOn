@@ -12,11 +12,7 @@ import AnnouncementMarquee from "@/components/AnnouncementMarquee";
 import BrandPopup from "@/components/BrandPopup";
 import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 import { BRAND, NAVSARI_AREAS, SERVICE_CATEGORIES } from "@/types";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 } }),
-};
+import { EASE_OUT, fadeUpHome as fadeUp } from "@/lib/motion";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -163,7 +159,7 @@ export default function Home() {
                     key={p.name}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.6, delay: 0.3 + i * 0.12, ease: EASE_OUT }}
                     className={`p-4 rounded-2xl border border-border bg-card shadow-md ${i === 1 ? "ml-10" : ""}`}
                   >
                     <div className="flex items-center gap-3">

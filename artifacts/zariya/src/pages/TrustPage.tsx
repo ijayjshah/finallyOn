@@ -4,11 +4,8 @@ import { Shield, MapPin, CheckCircle2, ArrowRight, Upload, Clock, Star, X } from
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BRAND } from "@/types";
+import { fadeUp } from "@/lib/motion";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 } }),
-};
 
 const TRUST_STEPS = [
   {

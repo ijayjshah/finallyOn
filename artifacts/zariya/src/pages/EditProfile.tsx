@@ -53,6 +53,7 @@ export default function EditProfile() {
       setForm({
         name: profile.name,
         category: profile.category,
+        customCategory: "",
         city: profile.city,
         area: profile.area,
         phone: profile.phone,

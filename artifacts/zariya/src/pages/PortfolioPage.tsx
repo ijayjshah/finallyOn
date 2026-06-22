@@ -3,11 +3,7 @@ import { useLocation } from "wouter";
 import { Star, MapPin, MessageCircle, CheckCircle2, Shield, ArrowRight, Image, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 } }),
-};
+import { fadeUp } from "@/lib/motion";
 
 const SAMPLE_PROFILES = [
   {

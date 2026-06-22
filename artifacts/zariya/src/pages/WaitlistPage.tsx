@@ -5,11 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BRAND, SERVICE_CATEGORIES, COMING_SOON_DISTRICTS } from "@/types";
 import { api } from "@/lib/api";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 } }),
-};
+import { fadeUp } from "@/lib/motion";
 
 function inputCls(err = false) {
   return `w-full px-4 py-3 rounded-xl border ${err ? "border-destructive" : "border-border focus:border-primary focus:ring-primary/20"} bg-card text-foreground placeholder:text-muted-foreground text-sm outline-none focus:ring-2 transition-all`;

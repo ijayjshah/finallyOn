@@ -60,6 +60,7 @@ export default function AddEditListing() {
         title: existing.title,
         type: existing.type,
         category: existing.category,
+        customCategory: "",
         subCategory: existing.subCategory ?? "",
         description: existing.description,
         price: existing.price,
