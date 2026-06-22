@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { User, ServiceProfile, Listing, Job } from "@/types";
 import { api, type ApiUser } from "@/lib/api";
+import { markWelcomeLoginDismissed } from "@/lib/popup-storage";
 
 export type AppUser = Omit<User, "password"> & {
   role?: "user" | "admin";
@@ -20,6 +21,7 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   register: (data: Omit<User, "id" | "createdAt"> & { password: string }) => Promise<{ success: boolean; error?: string }>;
+  completeOnboarding: () => Promise<void>;
   refreshData: () => Promise<void>;
   updateUser: (id: string, data: Partial<AppUser>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
@@ -147,6 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const user = toAppUser(res.data.user);
     setCurrentUser(user);
+    markWelcomeLoginDismissed();
     if (user.role === "admin") {
       await loadAdminData();
     } else {
@@ -182,9 +185,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const user = toAppUser(res.data.user);
     setCurrentUser(user);
+    markWelcomeLoginDismissed();
     await Promise.all([loadPublicData(), loadMyData()]);
     return { success: true };
   }, [loadPublicData, loadMyData]);
+
+  const completeOnboarding = useCallback(async () => {
+    const res = await api.completeOnboarding();
+    if (res.data?.user) {
+      setCurrentUser(toAppUser(res.data.user));
+      return;
+    }
+    setCurrentUser((prev) => (prev ? { ...prev, onboardingCompleted: true } : prev));
+  }, []);
 
   const updateUser = useCallback(async (id: string, data: Partial<AppUser>) => {
     const res = await api.admin.updateUser(id, data);
@@ -426,6 +439,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         register,
+        completeOnboarding,
         refreshData,
         updateUser,
         deleteUser,

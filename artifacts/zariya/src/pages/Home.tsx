@@ -10,7 +10,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnnouncementMarquee from "@/components/AnnouncementMarquee";
 import BrandPopup from "@/components/BrandPopup";
-import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 import { BRAND, NAVSARI_AREAS, SERVICE_CATEGORIES } from "@/types";
 import { EASE_OUT, fadeUpHome as fadeUp } from "@/lib/motion";
 
@@ -526,7 +525,6 @@ export default function Home() {
       </main>
       <Footer />
       <BrandPopup />
-      <OnboardingWalkthrough />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { BRAND, UserType } from "@/types";
+import UserAccountButton from "@/components/UserAccountButton";
 
 type NavLink = { label: string; href: string; icon: React.ElementType };
 
@@ -205,9 +206,14 @@ export default function AppNavbar() {
           </div>
         </div>
 
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors">
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-1 md:gap-2">
+          <div className="md:hidden">
+            <UserAccountButton variant="app" />
+          </div>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Open menu">
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -250,6 +256,22 @@ export default function AppNavbar() {
                 >
                   <PlusCircle className="w-4 h-4" />
                   {ctaLabel}
+                </button>
+              )}
+              <button
+                onClick={() => handleNav(profile ? `/app/profile/${profile.id}` : "/app/profile/create")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <User className="w-4 h-4 text-muted-foreground" />
+                {profile ? "View Profile" : "Create Profile"}
+              </button>
+              {showListingCTA && (
+                <button
+                  onClick={() => handleNav("/app/jobs/post")}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  Post a Job
                 </button>
               )}
               <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Briefcase, Package, MessageCircle, Shield, Star, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useApp } from "@/context/AppContext";
-import { api } from "@/lib/api";
 import { BRAND } from "@/types";
+import { hasCompletedTour, markTourCompleted } from "@/lib/popup-storage";
 
 const STEPS = [
   {
@@ -45,22 +46,43 @@ const STEPS = [
 ];
 
 export default function OnboardingWalkthrough() {
-  const { currentUser } = useApp();
+  const [location] = useLocation();
+  const { currentUser, completeOnboarding } = useApp();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
 
+  const shouldSkipRoute =
+    location === "/login" ||
+    location === "/register" ||
+    location.startsWith("/app/profile/create");
+
   useEffect(() => {
-    if (!currentUser) return;
-    if (!currentUser.onboardingCompleted) setVisible(true);
-  }, [currentUser?.id, currentUser?.onboardingCompleted]);
+    if (!currentUser || shouldSkipRoute) {
+      setVisible(false);
+      return;
+    }
+
+    const done =
+      currentUser.onboardingCompleted === true ||
+      hasCompletedTour(currentUser.id);
+
+    if (done) {
+      setVisible(false);
+      return;
+    }
+
+    setVisible(true);
+  }, [currentUser?.id, currentUser?.onboardingCompleted, shouldSkipRoute]);
 
   const finish = () => {
-    void api.completeOnboarding();
+    if (!currentUser) return;
+    markTourCompleted(currentUser.id);
     setVisible(false);
+    void completeOnboarding();
   };
 
   const next = () => {
-    if (step < STEPS.length - 1) setStep(step + 1);
+    if (step < STEPS.length - 1) setStep((s) => s + 1);
     else finish();
   };
 
@@ -71,18 +93,14 @@ export default function OnboardingWalkthrough() {
   return (
     <AnimatePresence>
       {visible && (
-        <div
-          className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-foreground/40 backdrop-blur-sm"
-        >
+        <div className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-foreground/40 backdrop-blur-sm">
           <motion.div
-            key={step}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="w-full sm:max-w-sm bg-card sm:rounded-3xl rounded-t-3xl border border-border shadow-2xl overflow-hidden"
           >
-            {/* Header */}
             <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-border">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
@@ -101,7 +119,6 @@ export default function OnboardingWalkthrough() {
               </button>
             </div>
 
-            {/* Step progress */}
             <div className="px-6 pt-4 flex gap-1.5">
               {STEPS.map((_, i) => (
                 <div
@@ -111,16 +128,23 @@ export default function OnboardingWalkthrough() {
               ))}
             </div>
 
-            {/* Content */}
-            <div className="p-6">
-              <div className={`w-14 h-14 rounded-2xl ${current.color} flex items-center justify-center mb-5`}>
-                <Icon className="w-7 h-7" />
-              </div>
-              <h2 className="text-lg font-extrabold text-foreground mb-2">{current.title}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{current.desc}</p>
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.2 }}
+                className="p-6"
+              >
+                <div className={`w-14 h-14 rounded-2xl ${current.color} flex items-center justify-center mb-5`}>
+                  <Icon className="w-7 h-7" />
+                </div>
+                <h2 className="text-lg font-extrabold text-foreground mb-2">{current.title}</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{current.desc}</p>
+              </motion.div>
+            </AnimatePresence>
 
-            {/* Actions */}
             <div className="px-6 pb-6 flex gap-3">
               <button
                 onClick={next}

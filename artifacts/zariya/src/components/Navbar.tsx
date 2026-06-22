@@ -5,6 +5,8 @@ import { useLocation } from "wouter";
 import { BRAND } from "@/types";
 import { useApp } from "@/context/AppContext";
 import LoginPromptModal from "@/components/LoginPromptModal";
+import UserAccountButton from "@/components/UserAccountButton";
+import { hasDismissedWelcomeLogin, markWelcomeLoginDismissed } from "@/lib/popup-storage";
 
 type BrowseKey = "services" | "businesses" | "jobs";
 
@@ -72,14 +74,29 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [loginPrompt, setLoginPrompt] = useState<BrowseKey | null>(null);
-  const [, navigate] = useLocation();
-  const { currentUser } = useApp();
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [location, navigate] = useLocation();
+  const { currentUser, loading } = useApp();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  useEffect(() => {
+    if (loading || currentUser) return;
+    if (hasDismissedWelcomeLogin()) return;
+    if (location === "/login" || location === "/register") return;
+
+    const t = setTimeout(() => setWelcomeOpen(true), 2500);
+    return () => clearTimeout(t);
+  }, [loading, currentUser, location]);
+
+  const closeWelcome = () => {
+    markWelcomeLoginDismissed();
+    setWelcomeOpen(false);
+  };
 
   const go = (href: string) => {
     navigate(href);
@@ -227,37 +244,27 @@ export default function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-2">
-            {currentUser ? (
+            <UserAccountButton variant="marketing" />
+            {!currentUser && (
               <button
-                onClick={() => go("/app/dashboard")}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+                onClick={() => go("/register")}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
               >
-                Go to App <ArrowRight className="w-3.5 h-3.5" />
+                List Your Business
               </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => go("/login")}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground hover:bg-muted transition-colors"
-                >
-                  Log In
-                </button>
-                <button
-                  onClick={() => go("/register")}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-                >
-                  List Your Business
-                </button>
-              </>
             )}
           </div>
 
-          <button
-            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="lg:hidden flex items-center gap-1">
+            <UserAccountButton variant="marketing" />
+            <button
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Open menu"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* ── Mobile menu ── */}
@@ -362,6 +369,11 @@ export default function Navbar() {
         open={loginPrompt !== null}
         onClose={() => setLoginPrompt(null)}
         context={loginPrompt ?? "services"}
+      />
+      <LoginPromptModal
+        open={welcomeOpen}
+        onClose={closeWelcome}
+        context="welcome"
       />
     </>
   );

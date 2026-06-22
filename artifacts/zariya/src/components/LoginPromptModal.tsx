@@ -6,10 +6,16 @@ import { BRAND } from "@/types";
 interface LoginPromptModalProps {
   open: boolean;
   onClose: () => void;
-  context?: "services" | "businesses" | "jobs";
+  context?: "services" | "businesses" | "jobs" | "welcome";
 }
 
 const contextMeta = {
+  welcome: {
+    icon: UserPlus,
+    color: "text-primary bg-primary/10",
+    title: "Welcome to FinallyOn",
+    desc: "Log in or create a free account to discover local services, businesses, and jobs in Navsari.",
+  },
   services: {
     icon: Wrench,
     color: "text-indigo-600 bg-indigo-50",
@@ -40,6 +46,10 @@ export default function LoginPromptModal({ open, onClose, context = "services" }
     navigate(path);
   };
 
+  const dismiss = () => {
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -49,7 +59,7 @@ export default function LoginPromptModal({ open, onClose, context = "services" }
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={dismiss}
           />
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -59,7 +69,7 @@ export default function LoginPromptModal({ open, onClose, context = "services" }
             className="relative w-full sm:max-w-sm bg-card rounded-t-3xl sm:rounded-3xl border border-border shadow-2xl overflow-hidden z-10"
           >
             <button
-              onClick={onClose}
+              onClick={dismiss}
               className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" />

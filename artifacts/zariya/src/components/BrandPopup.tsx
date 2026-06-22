@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { X, MapPin, Shield, MessageCircle, Briefcase, ArrowRight } from "lucide-react";
 import { BRAND } from "@/types";
+import { hasSeenBrandPopup, markBrandPopupSeen } from "@/lib/popup-storage";
 
 const DELAY_MS = 15000;
 
@@ -11,11 +12,15 @@ export default function BrandPopup() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
+    if (hasSeenBrandPopup()) return;
     const t = setTimeout(() => setVisible(true), DELAY_MS);
     return () => clearTimeout(t);
   }, []);
 
-  const dismiss = () => setVisible(false);
+  const dismiss = () => {
+    markBrandPopupSeen();
+    setVisible(false);
+  };
 
   const handleLearnMore = () => {
     dismiss();
