@@ -1,4 +1,5 @@
 import type { Job, Listing, ServiceProfile, User, UserType } from "@/types";
+import { getApiBaseUrl } from "@/lib/env";
 
 type ApiUser = Omit<User, "password"> & {
   role?: "user" | "admin";
@@ -15,7 +16,7 @@ async function request<T>(
   options?: RequestInit,
 ): Promise<Result<T>> {
   try {
-    const res = await fetch(`/api${path}`, {
+    const res = await fetch(`${getApiBaseUrl()}${path}`, {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",

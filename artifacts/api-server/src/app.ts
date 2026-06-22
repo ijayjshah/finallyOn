@@ -7,6 +7,7 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { HttpError } from "./lib/http-error";
 import { attachUser } from "./middleware/auth";
+import { getCorsOrigins } from "./lib/cors-origins";
 
 const app: Express = express();
 
@@ -32,7 +33,7 @@ app.use(
 
 app.use(
   cors({
-    origin: process.env.WEB_ORIGIN ?? "http://localhost:26163",
+    origin: getCorsOrigins(),
     credentials: true,
   }),
 );

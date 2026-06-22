@@ -17,6 +17,7 @@ const apiServerUrl =
   process.env.API_SERVER_URL ?? `http://localhost:${apiPort}`;
 
 export default defineConfig({
+  envDir: path.resolve(import.meta.dirname),
   base: process.env.BASE_PATH ?? "/",
   plugins: [
     react(),
