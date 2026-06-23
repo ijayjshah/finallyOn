@@ -1,10 +1,24 @@
 import { createHash, randomBytes } from "node:crypto";
-import type { Response } from "express";
-import { eq, gt } from "drizzle-orm";
+import type { CookieOptions, Response } from "express";
+import { eq } from "drizzle-orm";
 import { db, sessionsTable, usersTable } from "@workspace/db";
+import { needsCrossSiteSessionCookies } from "./cors-origins";
 
 const COOKIE_NAME = "finallyon_session";
 const SESSION_DAYS = 7;
+
+function getSessionCookieOptions(): CookieOptions {
+  const crossSite = needsCrossSiteSessionCookies();
+  const isProduction = process.env.NODE_ENV === "production";
+
+  return {
+    httpOnly: true,
+  secure: isProduction || crossSite,
+    sameSite: crossSite ? "none" : "lax",
+    maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000,
+    path: "/",
+  };
+}
 
 export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -30,13 +44,7 @@ export async function createSession(
     userAgent: meta?.userAgent,
   });
 
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000,
-    path: "/",
-  });
+  res.cookie(COOKIE_NAME, token, getSessionCookieOptions());
 }
 
 export async function destroySession(token: string | undefined, res: Response) {
@@ -46,7 +54,8 @@ export async function destroySession(token: string | undefined, res: Response) {
       .where(eq(sessionsTable.tokenHash, hashToken(token)));
   }
 
-  res.clearCookie(COOKIE_NAME, { path: "/" });
+  const { secure, sameSite, path } = getSessionCookieOptions();
+  res.clearCookie(COOKIE_NAME, { path, secure, sameSite });
 }
 
 export async function getUserFromSessionToken(token: string | undefined) {
