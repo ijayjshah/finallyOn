@@ -16,3 +16,4 @@ export const db = drizzle(pool, { schema });
 
 export * from "./schema";
 export * from "./password";
+export * from "./profile-slug";

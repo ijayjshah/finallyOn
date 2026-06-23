@@ -95,6 +95,10 @@ export const api = {
     return request<{ profile: ServiceProfile }>(`/profiles/${id}`);
   },
 
+  async getProfileBySlug(slug: string) {
+    return request<{ profile: ServiceProfile }>(`/profiles/slug/${encodeURIComponent(slug)}`);
+  },
+
   async createProfile(data: Record<string, unknown>) {
     return request<{ profile: ServiceProfile }>("/profiles", {
       method: "POST",

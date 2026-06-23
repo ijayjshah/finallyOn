@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Edit2, Trash2, Eye, EyeOff, Package, Wrench, Search } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { Listing } from "@/types";
 
 function ListingCard({
@@ -113,11 +114,20 @@ function ListingCard({
 
 export default function MyListings() {
   const [, navigate] = useLocation();
-  const { currentUser, getListingsByUserId, deleteListing, updateListing } = useApp();
+  const { currentUser, getListingsByUserId, deleteListing, updateListing, ensureMyData } = useApp();
+  const pageLoading = useEnsureData(() => ensureMyData(), [ensureMyData]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "service" | "product">("all");
 
   if (!currentUser) return null;
+
+  if (pageLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-4xl mx-auto px-4 md:px-8 py-20 text-center text-sm text-muted-foreground">Loading listings…</div>
+      </AppLayout>
+    );
+  }
 
   const allListings = getListingsByUserId(currentUser.id);
   const filtered = allListings.filter((l) => {

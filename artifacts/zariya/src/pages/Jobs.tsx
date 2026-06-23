@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { NAVSARI_AREAS, SERVICE_CATEGORIES, EMPLOYMENT_TYPES, Job } from "@/types";
 
 type Tab = "openings" | "seekers";
@@ -180,7 +181,9 @@ function JobModal({ job, onClose }: { job: Job; onClose: () => void }) {
 
 export default function Jobs() {
   const [, navigate] = useLocation();
-  const { jobs, currentUser } = useApp();
+  const { jobs, currentUser, ensureJobs } = useApp();
+
+  const pageLoading = useEnsureData(() => ensureJobs(), [ensureJobs]);
 
   const [tab, setTab] = useState<Tab>("openings");
   const [search, setSearch] = useState("");
@@ -216,6 +219,14 @@ export default function Jobs() {
 
   const openingCount = jobs.filter((j) => j.active && j.listingType === "opening" && (!j.approvalStatus || j.approvalStatus === "approved")).length;
   const seekerCount = jobs.filter((j) => j.active && j.listingType === "seeker" && (!j.approvalStatus || j.approvalStatus === "approved")).length;
+
+  if (pageLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-4xl mx-auto px-4 md:px-8 py-20 text-center text-sm text-muted-foreground">Loading jobs…</div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

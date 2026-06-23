@@ -11,6 +11,7 @@ import {
 import { asyncHandler } from "../lib/async-handler";
 import { HttpError } from "../lib/http-error";
 import { parseIdParam, serializeProfile } from "../lib/serializers";
+import { uniqueProfileSlug } from "../lib/profile-slug";
 import { requireAuth } from "../middleware/auth";
 
 const router: IRouter = Router();
@@ -44,6 +45,17 @@ const profileBodySchema = z.object({
 async function loadProfile(id: number) {
   return db.query.serviceProfilesTable.findFirst({
     where: eq(serviceProfilesTable.id, id),
+    with: {
+      services: true,
+      photos: true,
+      tags: true,
+    },
+  });
+}
+
+async function loadProfileBySlug(slug: string) {
+  return db.query.serviceProfilesTable.findFirst({
+    where: eq(serviceProfilesTable.slug, slug),
     with: {
       services: true,
       photos: true,
@@ -119,6 +131,26 @@ router.get(
 );
 
 router.get(
+  "/slug/:slug",
+  asyncHandler(async (req, res) => {
+    const rawSlug = req.params.slug;
+    const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug)?.trim().toLowerCase();
+    if (!slug) throw new HttpError(400, "Invalid slug");
+
+    const profile = await loadProfileBySlug(slug);
+    if (!profile) throw new HttpError(404, "Profile not found");
+
+    const isOwner = req.user?.id === profile.userId;
+    const isAdmin = req.user?.role === "admin";
+    if (profile.approvalStatus !== "approved" && !isOwner && !isAdmin) {
+      throw new HttpError(404, "Profile not found");
+    }
+
+    res.json({ profile: serializeProfile(profile) });
+  }),
+);
+
+router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = parseIdParam(req.params.id);
@@ -149,11 +181,14 @@ router.post(
       throw new HttpError(409, "You already have a profile.");
     }
 
+    const slug = await uniqueProfileSlug(body.name);
+
     const [profile] = await db
       .insert(serviceProfilesTable)
       .values({
         userId: req.user!.id,
         name: body.name,
+        slug,
         category: body.category,
         profileType: body.profileType,
         city: body.city,
@@ -192,10 +227,17 @@ router.patch(
     const isAdmin = req.user!.role === "admin";
     if (!isOwner && !isAdmin) throw new HttpError(403, "Forbidden");
 
+    const nextName = body.name ?? profile.name;
+    const nextSlug =
+      body.name !== undefined && body.name !== profile.name
+        ? await uniqueProfileSlug(nextName, id)
+        : undefined;
+
     await db
       .update(serviceProfilesTable)
       .set({
         ...(body.name !== undefined ? { name: body.name } : {}),
+        ...(nextSlug !== undefined ? { slug: nextSlug } : {}),
         ...(body.category !== undefined ? { category: body.category } : {}),
         ...(body.profileType !== undefined ? { profileType: body.profileType } : {}),
         ...(body.city !== undefined ? { city: body.city } : {}),

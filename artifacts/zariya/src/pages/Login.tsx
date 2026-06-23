@@ -36,7 +36,7 @@ export default function Login() {
     const result = await login(email, password);
     setLoading(false);
     if (result.success) {
-      navigate("/app/dashboard");
+      navigate(result.user?.role === "admin" ? "/app/admin/overview" : "/app/dashboard");
     } else {
       setError(result.error ?? "Login failed.");
     }

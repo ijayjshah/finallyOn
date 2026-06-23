@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Search, MapPin, Star, Shield, Filter, X, MessageCircle, Phone, Wrench, Store } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { NAVSARI_AREAS, SERVICE_PROVIDER_CATEGORIES, BUSINESS_CATEGORIES } from "@/types";
 
 type TabType = "services" | "businesses";
@@ -11,7 +12,9 @@ type TabType = "services" | "businesses";
 export default function Discover() {
   const [, navigate] = useLocation();
   const search = useSearch();
-  const { profiles } = useApp();
+  const { profiles, ensureProfiles } = useApp();
+
+  const pageLoading = useEnsureData(() => ensureProfiles(), [ensureProfiles]);
 
   const initialTab: TabType = search.includes("tab=businesses") ? "businesses" : "services";
   const [tab, setTab] = useState<TabType>(initialTab);
@@ -62,6 +65,14 @@ export default function Discover() {
     selectedCategory !== "All" ||
     verifiedOnly ||
     availableOnly;
+
+  if (pageLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-20 text-center text-sm text-muted-foreground">Loading profiles…</div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

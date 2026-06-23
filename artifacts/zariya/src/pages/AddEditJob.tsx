@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Save, Briefcase, UserSearch } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { NAVSARI_AREAS, SERVICE_CATEGORIES, EMPLOYMENT_TYPES, BRAND } from "@/types";
 
 function inputCls(hasError = false) {
@@ -24,10 +25,11 @@ function Field({ label, children, error, hint }: { label: string; children: Reac
 export default function AddEditJob() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { currentUser, addJob, updateJob, jobs } = useApp();
+  const { currentUser, addJob, updateJob, myJobs, ensureMyData } = useApp();
+  useEnsureData(() => ensureMyData(), [ensureMyData]);
 
   const editId = params.id;
-  const existing = editId ? jobs.find((j) => j.id === editId) : undefined;
+  const existing = editId ? myJobs.find((j) => j.id === editId) : undefined;
   const isEdit = !!existing;
 
   const [form, setForm] = useState({

@@ -5,14 +5,29 @@ import {
   MapPin, CheckCircle2, Zap, Clock, Shield, MessageCircle, Briefcase,
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
+import ShareProfileCard from "@/components/ShareProfileCard";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { BRAND } from "@/types";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
-  const { currentUser, getProfileByUserId, getListingsByUserId, profiles } = useApp();
+  const { currentUser, getProfileByUserId, getListingsByUserId, profiles, ensureProfiles, ensureMyData } = useApp();
+
+  const pageLoading = useEnsureData(
+    () => Promise.all([ensureProfiles(), ensureMyData()]).then(() => undefined),
+    [ensureProfiles, ensureMyData],
+  );
 
   if (!currentUser) return null;
+
+  if (pageLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-20 text-center text-sm text-muted-foreground">Loading dashboard…</div>
+      </AppLayout>
+    );
+  }
 
   const myProfile = getProfileByUserId(currentUser.id);
   const myListings = getListingsByUserId(currentUser.id);
@@ -117,6 +132,16 @@ export default function Dashboard() {
                 Edit & Resubmit →
               </button>
             </div>
+          </motion.div>
+        )}
+
+        {profileApproval === "approved" && myProfile?.slug && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <ShareProfileCard slug={myProfile.slug} profileName={myProfile.name} />
           </motion.div>
         )}
 

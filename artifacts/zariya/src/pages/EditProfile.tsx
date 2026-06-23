@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import PhotoUpload from "@/components/PhotoUpload";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { GUJARAT_CITIES, SERVICE_CATEGORIES, ServiceItem } from "@/types";
 
 function uid() {
@@ -27,7 +28,8 @@ function Field({ label, children, error }: { label: string; children: React.Reac
 
 export default function EditProfile() {
   const [, navigate] = useLocation();
-  const { currentUser, getProfileByUserId, updateProfile } = useApp();
+  const { currentUser, getProfileByUserId, updateProfile, ensureMyData } = useApp();
+  useEnsureData(() => ensureMyData(), [ensureMyData]);
   const profile = currentUser ? getProfileByUserId(currentUser.id) : undefined;
 
   const [form, setForm] = useState({

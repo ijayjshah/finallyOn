@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Clock, Truck, Store, MessageCircle, Package } from "lu
 import AppLayout from "@/components/AppLayout";
 import PhotoUpload from "@/components/PhotoUpload";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { NAVSARI_AREAS, SERVICE_CATEGORIES, PRODUCT_MAX } from "@/types";
 
 function inputCls(hasError = false) {
@@ -25,14 +26,16 @@ function Field({ label, children, error, hint }: { label: string; children: Reac
 export default function AddEditListing() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { currentUser, addListing, updateListing, listings } = useApp();
+  const { currentUser, addListing, updateListing, getListingsByUserId, ensureMyData } = useApp();
+  useEnsureData(() => ensureMyData(), [ensureMyData]);
 
   const editId = params.id;
-  const existing = editId ? listings.find((l) => l.id === editId) : undefined;
+  const myListings = currentUser ? getListingsByUserId(currentUser.id) : [];
+  const existing = editId ? myListings.find((l) => l.id === editId) : undefined;
   const isEdit = !!existing;
 
   // Count user's product listings
-  const userProductListings = listings.filter((l) => l.userId === currentUser?.id && l.type === "product");
+  const userProductListings = myListings.filter((l) => l.type === "product");
   const canAddProduct = isEdit || userProductListings.length < PRODUCT_MAX;
 
   const [form, setForm] = useState({

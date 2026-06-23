@@ -6,6 +6,7 @@ import { AppProvider } from "@/context/AppContext";
 import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 import ScrollToTop from "@/components/ScrollToTop";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import NotFound from "@/pages/not-found";
 
 import Home from "@/pages/Home";
@@ -28,6 +29,7 @@ import Jobs from "@/pages/Jobs";
 import AddEditJob from "@/pages/AddEditJob";
 import CreateProfile from "@/pages/CreateProfile";
 import ViewProfile from "@/pages/ViewProfile";
+import PublicProfile from "@/pages/PublicProfile";
 import EditProfile from "@/pages/EditProfile";
 import MyListings from "@/pages/MyListings";
 import AddEditListing from "@/pages/AddEditListing";
@@ -51,8 +53,34 @@ function Router() {
       <Route path="/pricing" component={PricingPage} />
       <Route path="/waitlist" component={WaitlistPage} />
 
-      {/* ── Admin (separate auth) ──────────────────── */}
-      <Route path="/admin" component={AdminPage} />
+      {/* ── Public shareable profiles (no login) ─────── */}
+      <Route path="/p/:slug" component={PublicProfile} />
+
+      {/* ── Admin panel (one route per section) ─────── */}
+      <Route path="/app/admin/overview">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin/users">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin/profiles">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin/listings">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin/jobs">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin/waitlist">
+        <AdminRoute><AdminPage /></AdminRoute>
+      </Route>
+      <Route path="/app/admin">
+        <Redirect to="/app/admin/overview" />
+      </Route>
+      <Route path="/admin">
+        <Redirect to="/app/admin/overview" />
+      </Route>
 
       {/* ── App shell ────────────────────────────────── */}
       <Route path="/app">

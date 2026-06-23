@@ -42,6 +42,7 @@ export function serializeProfile(profile: ProfileRow) {
   return {
     id: String(profile.id),
     userId: String(profile.userId),
+    slug: profile.slug,
     name: profile.name,
     category: profile.category,
     profileType: profile.profileType,

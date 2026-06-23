@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { User, ServiceProfile, Listing, Job } from "@/types";
 import { api, type ApiUser } from "@/lib/api";
 import { markWelcomeLoginDismissed } from "@/lib/popup-storage";
@@ -7,6 +7,17 @@ export type AppUser = Omit<User, "password"> & {
   role?: "user" | "admin";
   onboardingCompleted?: boolean;
 };
+
+interface LoadFlags {
+  profiles: boolean;
+  listings: boolean;
+  jobs: boolean;
+  myData: boolean;
+  adminUsers: boolean;
+  adminProfiles: boolean;
+  adminListings: boolean;
+  adminJobs: boolean;
+}
 
 interface AppContextType {
   currentUser: AppUser | null;
@@ -18,14 +29,21 @@ interface AppContextType {
   myProfile: ServiceProfile | null;
   myListings: Listing[];
   myJobs: Job[];
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  ensureProfiles: () => Promise<void>;
+  ensureListings: () => Promise<void>;
+  ensureJobs: () => Promise<void>;
+  ensureMyData: () => Promise<void>;
+  ensureAdminUsers: () => Promise<void>;
+  ensureAdminProfiles: () => Promise<void>;
+  ensureAdminListings: () => Promise<void>;
+  ensureAdminJobs: () => Promise<void>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: AppUser }>;
   logout: () => Promise<void>;
   register: (data: Omit<User, "id" | "createdAt"> & { password: string }) => Promise<{ success: boolean; error?: string }>;
   completeOnboarding: () => Promise<void>;
-  refreshData: () => Promise<void>;
   updateUser: (id: string, data: Partial<AppUser>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
-  createProfile: (data: Omit<ServiceProfile, "id" | "createdAt">) => Promise<ServiceProfile | null>;
+  createProfile: (data: Omit<ServiceProfile, "id" | "createdAt" | "slug">) => Promise<ServiceProfile | null>;
   updateProfile: (id: string, data: Partial<ServiceProfile>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
   getProfileByUserId: (userId: string) => ServiceProfile | undefined;
@@ -41,6 +59,17 @@ interface AppContextType {
 }
 
 const AppContext = createContext<AppContextType | null>(null);
+
+const EMPTY_FLAGS: LoadFlags = {
+  profiles: false,
+  listings: false,
+  jobs: false,
+  myData: false,
+  adminUsers: false,
+  adminProfiles: false,
+  adminListings: false,
+  adminJobs: false,
+};
 
 function toAppUser(user: ApiUser): AppUser {
   return {
@@ -70,49 +99,102 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [myJobs, setMyJobs] = useState<Job[]>([]);
 
-  const loadPublicData = useCallback(async () => {
-    const [profilesRes, listingsRes, jobsRes] = await Promise.all([
-      api.getProfiles(),
-      api.getListings(),
-      api.getJobs(),
-    ]);
-    if (profilesRes.data) setProfiles(profilesRes.data.profiles);
-    if (listingsRes.data) setListings(listingsRes.data.listings);
-    if (jobsRes.data) setJobs(jobsRes.data.jobs);
+  const loadedRef = useRef<LoadFlags>({ ...EMPTY_FLAGS });
+  const inflightRef = useRef<Partial<Record<keyof LoadFlags, Promise<void>>>>({});
+
+  const resetCache = useCallback(() => {
+    loadedRef.current = { ...EMPTY_FLAGS };
+    inflightRef.current = {};
+    setUsers([]);
+    setProfiles([]);
+    setListings([]);
+    setJobs([]);
+    setMyProfile(null);
+    setMyListings([]);
+    setMyJobs([]);
   }, []);
 
-  const loadMyData = useCallback(async () => {
-    const [profileRes, listingsRes, jobsRes] = await Promise.all([
-      api.getMyProfile(),
-      api.getMyListings(),
-      api.getMyJobs(),
-    ]);
-    if (profileRes.data) setMyProfile(profileRes.data.profile);
-    if (listingsRes.data) setMyListings(listingsRes.data.listings);
-    if (jobsRes.data) setMyJobs(jobsRes.data.jobs);
-  }, []);
+  const runOnce = useCallback(
+    async (key: keyof LoadFlags, fetcher: () => Promise<void>) => {
+      if (loadedRef.current[key]) return;
+      const existing = inflightRef.current[key];
+      if (existing) return existing;
 
-  const loadAdminData = useCallback(async () => {
-    const [usersRes, profilesRes, listingsRes, jobsRes] = await Promise.all([
-      api.admin.getUsers(),
-      api.admin.getProfiles(),
-      api.admin.getListings(),
-      api.admin.getJobs(),
-    ]);
-    if (usersRes.data) setUsers(usersRes.data.users.map(toAppUser));
-    if (profilesRes.data) setProfiles(profilesRes.data.profiles);
-    if (listingsRes.data) setListings(listingsRes.data.listings);
-    if (jobsRes.data) setJobs(jobsRes.data.jobs);
-  }, []);
+      const promise = fetcher()
+        .then(() => {
+          loadedRef.current[key] = true;
+        })
+        .finally(() => {
+          delete inflightRef.current[key];
+        });
 
-  const refreshData = useCallback(async () => {
-    if (currentUser?.role === "admin") {
-      await loadAdminData();
-    } else {
-      await loadPublicData();
-      if (currentUser) await loadMyData();
-    }
-  }, [currentUser, loadAdminData, loadPublicData, loadMyData]);
+      inflightRef.current[key] = promise;
+      return promise;
+    },
+    [],
+  );
+
+  const ensureProfiles = useCallback(async () => {
+    await runOnce("profiles", async () => {
+      const res = await api.getProfiles();
+      if (res.data) setProfiles(res.data.profiles);
+    });
+  }, [runOnce]);
+
+  const ensureListings = useCallback(async () => {
+    await runOnce("listings", async () => {
+      const res = await api.getListings();
+      if (res.data) setListings(res.data.listings);
+    });
+  }, [runOnce]);
+
+  const ensureJobs = useCallback(async () => {
+    await runOnce("jobs", async () => {
+      const res = await api.getJobs();
+      if (res.data) setJobs(res.data.jobs);
+    });
+  }, [runOnce]);
+
+  const ensureMyData = useCallback(async () => {
+    await runOnce("myData", async () => {
+      const [profileRes, listingsRes, jobsRes] = await Promise.all([
+        api.getMyProfile(),
+        api.getMyListings(),
+        api.getMyJobs(),
+      ]);
+      if (profileRes.data) setMyProfile(profileRes.data.profile);
+      if (listingsRes.data) setMyListings(listingsRes.data.listings);
+      if (jobsRes.data) setMyJobs(jobsRes.data.jobs);
+    });
+  }, [runOnce]);
+
+  const ensureAdminUsers = useCallback(async () => {
+    await runOnce("adminUsers", async () => {
+      const res = await api.admin.getUsers();
+      if (res.data) setUsers(res.data.users.map(toAppUser));
+    });
+  }, [runOnce]);
+
+  const ensureAdminProfiles = useCallback(async () => {
+    await runOnce("adminProfiles", async () => {
+      const res = await api.admin.getProfiles();
+      if (res.data) setProfiles(res.data.profiles);
+    });
+  }, [runOnce]);
+
+  const ensureAdminListings = useCallback(async () => {
+    await runOnce("adminListings", async () => {
+      const res = await api.admin.getListings();
+      if (res.data) setListings(res.data.listings);
+    });
+  }, [runOnce]);
+
+  const ensureAdminJobs = useCallback(async () => {
+    await runOnce("adminJobs", async () => {
+      const res = await api.admin.getJobs();
+      if (res.data) setJobs(res.data.jobs);
+    });
+  }, [runOnce]);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,24 +205,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
 
       const user = meRes.data?.user ? toAppUser(meRes.data.user) : null;
-      if (user) {
-        setCurrentUser(user);
-        if (user.role === "admin") {
-          await loadAdminData();
-        } else {
-          await Promise.all([loadPublicData(), loadMyData()]);
-        }
-      } else {
-        setCurrentUser(null);
-        await loadPublicData();
-      }
-
+      setCurrentUser(user);
       if (!cancelled) setLoading(false);
     }
 
     void init();
     return () => { cancelled = true; };
-  }, [loadAdminData, loadPublicData, loadMyData]);
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.login(email, password);
@@ -150,23 +221,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const user = toAppUser(res.data.user);
     setCurrentUser(user);
     markWelcomeLoginDismissed();
-    if (user.role === "admin") {
-      await loadAdminData();
-    } else {
-      await Promise.all([loadPublicData(), loadMyData()]);
-    }
-    return { success: true };
-  }, [loadAdminData, loadPublicData, loadMyData]);
+    return { success: true, user };
+  }, []);
 
   const logout = useCallback(async () => {
     await api.logout();
     setCurrentUser(null);
-    setMyProfile(null);
-    setMyListings([]);
-    setMyJobs([]);
-    setUsers([]);
-    await loadPublicData();
-  }, [loadPublicData]);
+    resetCache();
+  }, [resetCache]);
 
   const register = useCallback(async (data: Omit<User, "id" | "createdAt"> & { password: string }) => {
     const res = await api.register({
@@ -186,9 +248,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const user = toAppUser(res.data.user);
     setCurrentUser(user);
     markWelcomeLoginDismissed();
-    await Promise.all([loadPublicData(), loadMyData()]);
     return { success: true };
-  }, [loadPublicData, loadMyData]);
+  }, []);
 
   const completeOnboarding = useCallback(async () => {
     const res = await api.completeOnboarding();
@@ -231,7 +292,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pickupAvailable: data.pickupAvailable,
   });
 
-  const createProfile = useCallback(async (data: Omit<ServiceProfile, "id" | "createdAt">) => {
+  const createProfile = useCallback(async (data: Omit<ServiceProfile, "id" | "createdAt" | "slug">) => {
     const profileType =
       data.profileType ??
       (currentUser?.type === "business_owner" ? "business" : "service");
@@ -243,8 +304,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!res.data) return null;
     const profile = res.data.profile;
     setMyProfile(profile);
+    loadedRef.current.profiles = false;
     if (profile.approvalStatus === "approved") {
       setProfiles((prev) => [...prev, profile]);
+      loadedRef.current.profiles = true;
     }
     return profile;
   }, [currentUser?.type]);
@@ -436,11 +499,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         myProfile,
         myListings,
         myJobs,
+        ensureProfiles,
+        ensureListings,
+        ensureJobs,
+        ensureMyData,
+        ensureAdminUsers,
+        ensureAdminProfiles,
+        ensureAdminListings,
+        ensureAdminJobs,
         login,
         logout,
         register,
         completeOnboarding,
-        refreshData,
         updateUser,
         deleteUser,
         createProfile,

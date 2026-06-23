@@ -26,6 +26,7 @@ export interface ServiceItem {
 export interface ServiceProfile {
   id: string;
   userId: string;
+  slug: string;
   name: string;
   category: string;
   profileType: 'service' | 'business';

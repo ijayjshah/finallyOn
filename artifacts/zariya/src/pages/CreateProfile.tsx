@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2, MapPin, MessageCircl
 import AppLayout from "@/components/AppLayout";
 import PhotoUpload from "@/components/PhotoUpload";
 import { useApp } from "@/context/AppContext";
+import { useEnsureData } from "@/hooks/useEnsureData";
 import { NAVSARI_AREAS, SERVICE_CATEGORIES, ServiceItem } from "@/types";
 
 function uid() {
@@ -39,7 +40,8 @@ const STEPS = ["Basic Info", "Location & Contact", "Work Photos", "Services", "R
 
 export default function CreateProfile() {
   const [, navigate] = useLocation();
-  const { currentUser, createProfile, getProfileByUserId } = useApp();
+  const { currentUser, createProfile, getProfileByUserId, ensureMyData } = useApp();
+  useEnsureData(() => ensureMyData(), [ensureMyData]);
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({

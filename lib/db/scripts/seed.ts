@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db, pool } from "../src/index.js";
 import { hashPassword } from "../src/password.js";
+import { slugifyProfileName } from "../src/profile-slug.js";
 import {
   analyticsEventsTable,
   approvalLogsTable,
@@ -319,14 +320,24 @@ async function seed() {
   ];
 
   const profileIds: number[] = [];
+  const usedSlugs = new Set<string>();
 
   for (const spec of profileSpecs) {
     const user = userByEmail[spec.userEmail]!;
+    let slug = slugifyProfileName(spec.name);
+    let suffix = 2;
+    while (usedSlugs.has(slug)) {
+      slug = `${slugifyProfileName(spec.name)}-${suffix}`;
+      suffix += 1;
+    }
+    usedSlugs.add(slug);
+
     const [profile] = await db
       .insert(serviceProfilesTable)
       .values({
         userId: user.id,
         name: spec.name,
+        slug,
         category: spec.category,
         profileType: spec.profileType,
         city: "Navsari",

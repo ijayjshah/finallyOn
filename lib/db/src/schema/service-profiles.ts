@@ -22,6 +22,7 @@ export const serviceProfilesTable = pgTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    slug: text("slug").notNull(),
     category: text("category").notNull(),
     profileType: profileTypeEnum("profile_type").notNull(),
     city: text("city").notNull(),
@@ -58,6 +59,7 @@ export const serviceProfilesTable = pgTable(
   },
   (table) => [
     uniqueIndex("service_profiles_user_id_unique").on(table.userId),
+    uniqueIndex("service_profiles_slug_unique").on(table.slug),
     index("service_profiles_approval_status_idx").on(table.approvalStatus),
     index("service_profiles_district_name_idx").on(table.districtName),
     index("service_profiles_category_idx").on(table.category),

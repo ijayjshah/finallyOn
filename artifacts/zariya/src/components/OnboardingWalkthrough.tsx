@@ -54,10 +54,11 @@ export default function OnboardingWalkthrough() {
   const shouldSkipRoute =
     location === "/login" ||
     location === "/register" ||
+    location.startsWith("/app/admin") ||
     location.startsWith("/app/profile/create");
 
   useEffect(() => {
-    if (!currentUser || shouldSkipRoute) {
+    if (!currentUser || shouldSkipRoute || currentUser.role === "admin") {
       setVisible(false);
       return;
     }
