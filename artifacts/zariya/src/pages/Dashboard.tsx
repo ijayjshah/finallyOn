@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import ShareProfileCard from "@/components/ShareProfileCard";
+import TrustCardShare from "@/components/TrustCardShare";
 import { useApp } from "@/context/AppContext";
 import { useEnsureData } from "@/hooks/useEnsureData";
 import { BRAND } from "@/types";
@@ -139,8 +140,14 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-6 space-y-4"
           >
+            {myProfile.trustCardUrl && (
+              <TrustCardShare
+                trustCardUrl={myProfile.trustCardUrl}
+                profileName={myProfile.name}
+              />
+            )}
             <ShareProfileCard slug={myProfile.slug} profileName={myProfile.name} />
           </motion.div>
         )}

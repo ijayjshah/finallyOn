@@ -189,6 +189,26 @@ export default function AdminProfiles() {
                       )}
                     </AnimatePresence>
 
+                    {/* Trust card */}
+                    {selectedProfile.trustCardUrl && (
+                      <div className="p-4 rounded-xl border border-border bg-card">
+                        <h3 className="font-bold text-sm text-foreground mb-3">Digital Business Card</h3>
+                        <img
+                          src={selectedProfile.trustCardUrl}
+                          alt={`${selectedProfile.name} trust card`}
+                          className="w-full max-w-sm rounded-xl border border-border"
+                        />
+                        <a
+                          href={selectedProfile.trustCardUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text-xs text-primary font-semibold hover:underline"
+                        >
+                          Open full image
+                        </a>
+                      </div>
+                    )}
+
                     {/* Photos */}
                     {selectedProfile.photos.length > 0 && (
                       <div className="p-4 rounded-xl border border-border bg-card">

@@ -50,6 +50,7 @@ export const serviceProfilesTable = pgTable(
     rejectionReason: text("rejection_reason"),
     deliveryAvailable: boolean("delivery_available").notNull().default(false),
     pickupAvailable: boolean("pickup_available").notNull().default(true),
+    trustCardUrl: text("trust_card_url"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

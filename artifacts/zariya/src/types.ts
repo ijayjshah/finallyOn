@@ -49,6 +49,7 @@ export interface ServiceProfile {
   resumeUrl?: string;
   deliveryAvailable?: boolean;
   pickupAvailable?: boolean;
+  trustCardUrl?: string;
   createdAt: string;
 }
 

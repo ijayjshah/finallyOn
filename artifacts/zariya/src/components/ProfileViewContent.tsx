@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { ServiceProfile } from "@/types";
 import { getPublicProfileUrl } from "@/lib/profile-url";
+import TrustCardShare from "@/components/TrustCardShare";
 
 interface ProfileViewContentProps {
   profile: ServiceProfile;
@@ -63,7 +64,15 @@ export default function ProfileViewContent({
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-7">
+    <div className="space-y-7">
+      {isOwner && profile.approvalStatus === "approved" && profile.trustCardUrl && (
+        <TrustCardShare
+          trustCardUrl={profile.trustCardUrl}
+          profileName={profile.name}
+        />
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-7">
       <div className="lg:col-span-1 space-y-4">
         {profile.photos.length > 0 ? (
           <div className="relative rounded-2xl overflow-hidden border border-border aspect-square">
@@ -397,6 +406,7 @@ export default function ProfileViewContent({
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
 } from "@workspace/db";
 import { asyncHandler } from "../lib/async-handler";
 import { HttpError } from "../lib/http-error";
+import { scheduleTrustCardGeneration } from "../lib/trust-card";
 import {
   parseIdParam,
   serializeJob,
@@ -197,6 +198,10 @@ router.patch(
 
     if (body.approvalStatus === "approved" || body.approvalStatus === "rejected") {
       await logApproval(req.user!.id, "profile", id, body.approvalStatus);
+    }
+
+    if (body.approvalStatus === "approved") {
+      scheduleTrustCardGeneration(id);
     }
 
     const updated = await db.query.serviceProfilesTable.findFirst({

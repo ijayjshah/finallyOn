@@ -330,8 +330,27 @@ export default function CreateProfile() {
                     className={inputCls(!!errors.mapUrl)}
                   />
                 </Field>
+                <div className="mt-3 rounded-xl overflow-hidden border border-primary/20 bg-card">
+                  <img
+                    src="/GBM.jpeg"
+                    alt="Example Google Maps business profile listing"
+                    className="w-full max-h-72 object-contain bg-muted/20"
+                  />
+                  <p className="text-xs text-muted-foreground px-3 py-2 border-t border-primary/10">
+                    Example: Your Google Maps link should open a listing like this for your shop or work location.
+                  </p>
+                </div>
                 <p className="text-xs text-primary/60 mt-2">
-                  Don't have a Maps listing? Open Google Maps, find your location, and copy the share URL.
+                  Don't have a Maps listing?{" "}
+                  <a
+                    href="https://www.youtube.com/watch?v=96gVE335SlQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-semibold text-primary"
+                  >
+                    Take the help of attachtotech
+                  </a>{" "}
+                  to set up your map location, then paste the share URL here.
                   For online-only businesses, contact{" "}
                   <a href="https://attachtotech.xyz" target="_blank" rel="noopener noreferrer" className="underline">attachtotech.xyz</a>.
                 </p>

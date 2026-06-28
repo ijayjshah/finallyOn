@@ -74,6 +74,7 @@ export function serializeProfile(profile: ProfileRow) {
     resumeUrl: profile.resumeUrl ?? undefined,
     deliveryAvailable: profile.deliveryAvailable,
     pickupAvailable: profile.pickupAvailable,
+    trustCardUrl: profile.trustCardUrl ?? undefined,
     createdAt: profile.createdAt.toISOString(),
   };
 }
