@@ -69,6 +69,7 @@ export default function CreateProfile() {
   const justCreatedRef = useRef(false);
 
   const existingProfile = currentUser ? getProfileByUserId(currentUser.id) : undefined;
+  const isBusinessProfile = currentUser?.type === "business_owner";
 
   useEffect(() => {
     if (submitted || submitting || justCreatedRef.current) return;
@@ -100,7 +101,9 @@ export default function CreateProfile() {
     }
     if (step === 1) {
       if (!form.phone.trim()) e.phone = "Phone number is required.";
-      if (!form.mapUrl.trim()) e.mapUrl = "Google Maps location is required — this is mandatory.";
+      if (isBusinessProfile && !form.mapUrl.trim()) {
+        e.mapUrl = "Google Maps location is required for business listings.";
+      }
       if (!form.whatsappNumber.trim()) e.whatsappNumber = "WhatsApp number is required.";
     }
     if (step === 2) {
@@ -130,7 +133,7 @@ export default function CreateProfile() {
       phone: form.phone.trim(),
       whatsappNumber: form.whatsappNumber.trim(),
       mapUrl: form.mapUrl.trim(),
-      resumeUrl: form.resumeNote.trim() || undefined,
+      resumeUrl: isBusinessProfile ? undefined : form.resumeNote.trim() || undefined,
       experience: form.experience,
       description: form.description.trim(),
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -319,9 +322,19 @@ export default function CreateProfile() {
               <div className="p-4 rounded-xl border-2 border-primary/25 bg-primary/5">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-bold text-primary">Google Maps Location — Mandatory</span>
+                  <span className="text-sm font-bold text-primary">
+                    Google Maps Location{isBusinessProfile ? " — Mandatory" : " — Optional"}
+                  </span>
                 </div>
-                <Field label="Google Maps Shop URL" error={errors.mapUrl} hint="Paste the Google Maps link to your shop/work location. Required for admin approval.">
+                <Field
+                  label={isBusinessProfile ? "Google Maps Shop URL" : "Google Maps Location (optional)"}
+                  error={errors.mapUrl}
+                  hint={
+                    isBusinessProfile
+                      ? "Paste the Google Maps link to your shop. Required for admin approval."
+                      : "Add your shop or work area on Google Maps if you have one. Service providers can skip this."
+                  }
+                >
                   <input
                     type="url"
                     value={form.mapUrl}
@@ -356,13 +369,14 @@ export default function CreateProfile() {
                 </p>
               </div>
 
+              {!isBusinessProfile && (
               <div className="p-4 rounded-xl border border-border bg-muted/30">
                 <div className="flex items-center gap-2 mb-3">
                   <Upload className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-bold text-foreground">Resume (Required for Service/Job Providers)</span>
+                  <span className="text-sm font-bold text-foreground">Resume (Required for Service Providers)</span>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">
-                  If you're listing yourself for a service or job, a resume is mandatory for admin approval. Upload yours via email or contact us:
+                  If you&apos;re listing yourself as a service provider, a resume is mandatory for admin approval. Upload yours via email or contact us:
                 </p>
                 <Field label="Resume note / link" hint="Paste a Google Drive link, or note 'Will send via email to support@finallyon.in'">
                   <input
@@ -374,6 +388,7 @@ export default function CreateProfile() {
                   />
                 </Field>
               </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground block">Service Options</label>
@@ -450,7 +465,7 @@ export default function CreateProfile() {
                 <Row label="Area" value={`${form.area}, Navsari`} />
                 <Row label="Phone" value={form.phone} />
                 <Row label="WhatsApp" value={form.whatsappNumber} />
-                <Row label="Google Maps" value={form.mapUrl ? "✓ Added" : "⚠️ Missing"} />
+                <Row label="Google Maps" value={form.mapUrl ? "✓ Added" : isBusinessProfile ? "⚠️ Missing" : "Not added (optional)"} />
                 <Row label="Experience" value={form.experience} />
                 <Row label="Photos" value={`${form.photos.length} uploaded`} />
                 <Row label="Services" value={`${form.services.filter((s) => s.name).length} listed`} />
@@ -480,9 +495,9 @@ export default function CreateProfile() {
                 </div>
               </div>
 
-              {!form.mapUrl && (
+              {isBusinessProfile && !form.mapUrl && (
                 <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/8 text-sm text-destructive">
-                  ⚠️ Google Maps location is missing. Go back to Step 2 and add it — your profile cannot be approved without it.
+                  ⚠️ Google Maps location is missing. Go back to Step 2 and add it — business profiles cannot be approved without it.
                 </div>
               )}
             </div>
@@ -515,7 +530,7 @@ export default function CreateProfile() {
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={submitting || !form.mapUrl}
+              disabled={submitting || (isBusinessProfile && !form.mapUrl.trim())}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-60"
             >
               {submitting ? (

@@ -261,7 +261,12 @@ export default function Dashboard() {
                   { label: "Account created", done: true },
                   { label: "Profile created", done: !!myProfile },
                   { label: "WhatsApp number added", done: !!myProfile?.whatsappNumber || !!currentUser.whatsappNumber },
-                  { label: "Google Maps location added", done: !!myProfile?.mapUrl },
+                  {
+                    label: myProfile?.profileType === "business"
+                      ? "Google Maps location added"
+                      : "Google Maps location (optional)",
+                    done: !!myProfile?.mapUrl || myProfile?.profileType === "service",
+                  },
                   { label: "Photos uploaded", done: !!myProfile && myProfile.photos.length > 0 },
                   { label: "Services/products added", done: !!myProfile && myProfile.services.length > 0 },
                   { label: "Admin approved", done: profileApproval === "approved" },
@@ -274,9 +279,9 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              {!myProfile?.mapUrl && myProfile && (
+              {!myProfile?.mapUrl && myProfile?.profileType === "business" && (
                 <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700">
-                  <strong>Required:</strong> Add your Google Maps location to complete your profile.
+                  <strong>Required:</strong> Add your Google Maps location to complete your business profile.
                 </div>
               )}
             </motion.div>
