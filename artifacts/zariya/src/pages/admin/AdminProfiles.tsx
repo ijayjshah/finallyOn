@@ -9,6 +9,7 @@ import { useApp } from "@/context/AppContext";
 import { useEnsureData } from "@/hooks/useEnsureData";
 import { SERVICE_CATEGORIES } from "@/types";
 import { Badge, inputCls, getMapEmbedUrl, type StatusFilter } from "@/pages/admin/shared";
+import { TrustCardPreview } from "@/components/TrustCardShare";
 
 export default function AdminProfiles() {
   const searchParams = useSearch();
@@ -193,16 +194,19 @@ export default function AdminProfiles() {
                     {selectedProfile.trustCardUrl && (
                       <div className="p-4 rounded-xl border border-border bg-card">
                         <h3 className="font-bold text-sm text-foreground mb-3">Digital Business Card</h3>
-                        <img
-                          src={selectedProfile.trustCardUrl}
-                          alt={`${selectedProfile.name} trust card`}
-                          className="w-full max-w-sm rounded-xl border border-border"
-                        />
+                        <div className="flex justify-center">
+                          <div className="inline-flex rounded-xl bg-gradient-to-b from-[#0a0a0a] to-[#030303] p-4">
+                            <TrustCardPreview
+                              trustCardUrl={selectedProfile.trustCardUrl}
+                              profileName={selectedProfile.name}
+                            />
+                          </div>
+                        </div>
                         <a
                           href={selectedProfile.trustCardUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block mt-2 text-xs text-primary font-semibold hover:underline"
+                          className="inline-block mt-3 text-xs text-primary font-semibold hover:underline"
                         >
                           Open full image
                         </a>

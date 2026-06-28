@@ -65,13 +65,6 @@ export default function ProfileViewContent({
 
   return (
     <div className="space-y-7">
-      {isOwner && profile.approvalStatus === "approved" && profile.trustCardUrl && (
-        <TrustCardShare
-          trustCardUrl={profile.trustCardUrl}
-          profileName={profile.name}
-        />
-      )}
-
       <div className="grid lg:grid-cols-3 gap-7">
       <div className="lg:col-span-1 space-y-4">
         {profile.photos.length > 0 ? (
@@ -125,6 +118,14 @@ export default function ProfileViewContent({
               </button>
             ))}
           </div>
+        )}
+
+        {isOwner && profile.approvalStatus === "approved" && profile.trustCardUrl && (
+          <TrustCardShare
+            trustCardUrl={profile.trustCardUrl}
+            profileName={profile.name}
+            layout="sidebar"
+          />
         )}
 
         <div className="p-5 rounded-2xl border border-border bg-card">

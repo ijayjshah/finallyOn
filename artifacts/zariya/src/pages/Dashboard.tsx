@@ -140,12 +140,13 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 space-y-4"
+            className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4"
           >
             {myProfile.trustCardUrl && (
               <TrustCardShare
                 trustCardUrl={myProfile.trustCardUrl}
                 profileName={myProfile.name}
+                layout="banner"
               />
             )}
             <ShareProfileCard slug={myProfile.slug} profileName={myProfile.name} />
