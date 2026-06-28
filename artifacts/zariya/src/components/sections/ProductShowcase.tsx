@@ -110,8 +110,8 @@ function DashboardScreen() {
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
           <div className="font-bold text-sm text-gray-900">Dashboard</div>
-          <div className="text-xs text-gray-400">May 2025</div>
-        </div>
+          <div className="text-xs text-gray-400">June 2026</div>
+        </div> 
         <Bell className="w-5 h-5 text-gray-400" />
       </div>
       <div className="p-4">

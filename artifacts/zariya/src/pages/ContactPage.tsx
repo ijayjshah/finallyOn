@@ -97,7 +97,7 @@ export default function ContactPage() {
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-sm font-semibold text-primary">Navsari District, Gujarat</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Expanding to Surat, Valsad, and Vapi in 2025.</p>
+                <p className="text-xs text-muted-foreground">Expanding to Surat, Valsad, and Vapi in 2026.</p>
               </div>
               <div>
                 <div className="font-bold text-sm text-foreground mb-1">Digital Partner</div>
@@ -232,7 +232,7 @@ export default function ContactPage() {
                     <div>
                       <div className="font-bold text-sm text-foreground mb-1">Operational Area</div>
                       <div className="text-sm text-foreground font-semibold">Navsari District, Gujarat, India</div>
-                      <div className="text-xs text-muted-foreground mt-1">Expanding to Surat, Valsad, and Vapi in 2025.</div>
+                      <div className="text-xs text-muted-foreground mt-1">Expanding to Surat, Valsad, and Vapi in 2026.</div>
                     </div>
                   </div>
                 </div>
