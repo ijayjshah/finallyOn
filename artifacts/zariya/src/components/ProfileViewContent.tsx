@@ -124,7 +124,6 @@ export default function ProfileViewContent({
           <TrustCardShare
             trustCardUrl={profile.trustCardUrl}
             profileName={profile.name}
-            layout="sidebar"
           />
         )}
 

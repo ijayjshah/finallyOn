@@ -9,7 +9,7 @@ import { useApp } from "@/context/AppContext";
 import { useEnsureData } from "@/hooks/useEnsureData";
 import { SERVICE_CATEGORIES } from "@/types";
 import { Badge, inputCls, getMapEmbedUrl, type StatusFilter } from "@/pages/admin/shared";
-import { TrustCardPreview } from "@/components/TrustCardShare";
+import { downloadTrustCard } from "@/components/TrustCardShare";
 
 export default function AdminProfiles() {
   const searchParams = useSearch();
@@ -193,23 +193,19 @@ export default function AdminProfiles() {
                     {/* Trust card */}
                     {selectedProfile.trustCardUrl && (
                       <div className="p-4 rounded-xl border border-border bg-card">
-                        <h3 className="font-bold text-sm text-foreground mb-3">Digital Business Card</h3>
-                        <div className="flex justify-center">
-                          <div className="inline-flex rounded-xl bg-gradient-to-b from-[#0a0a0a] to-[#030303] p-4">
-                            <TrustCardPreview
-                              trustCardUrl={selectedProfile.trustCardUrl}
-                              profileName={selectedProfile.name}
-                            />
-                          </div>
-                        </div>
-                        <a
-                          href={selectedProfile.trustCardUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block mt-3 text-xs text-primary font-semibold hover:underline"
+                        <h3 className="font-bold text-sm text-foreground mb-2">Digital Business Card</h3>
+                        <p className="text-xs text-muted-foreground mb-3">Generated trust card for this profile.</p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void downloadTrustCard(selectedProfile.trustCardUrl!, selectedProfile.name).catch(() => {
+                              window.open(selectedProfile.trustCardUrl!, "_blank", "noopener,noreferrer");
+                            })
+                          }
+                          className="text-xs text-primary font-semibold hover:underline"
                         >
-                          Open full image
-                        </a>
+                          Download card
+                        </button>
                       </div>
                     )}
 

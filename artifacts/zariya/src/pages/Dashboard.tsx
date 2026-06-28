@@ -146,7 +146,6 @@ export default function Dashboard() {
               <TrustCardShare
                 trustCardUrl={myProfile.trustCardUrl}
                 profileName={myProfile.name}
-                layout="banner"
               />
             )}
             <ShareProfileCard slug={myProfile.slug} profileName={myProfile.name} />
