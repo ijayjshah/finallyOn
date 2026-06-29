@@ -10,6 +10,8 @@ out-tsc
 
 # dependencies
 node_modules
+.playwright-browsers
+artifacts/api-server/.playwright-browsers
 
 # IDEs and editors
 /.idea

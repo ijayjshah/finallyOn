@@ -31,6 +31,8 @@ async function buildAll() {
       "*.node",
       "sharp",
       "cloudinary",
+      "@sparticuz/chromium",
+      "puppeteer-core",
       "playwright",
       "playwright-core",
       "better-sqlite3",
