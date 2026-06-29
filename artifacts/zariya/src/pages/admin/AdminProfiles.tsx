@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, ChevronRight, X, CheckCircle2, XCircle, Shield, RefreshCw, Edit2, Save, Trash2,
-  User, Map, ExternalLink, ImageIcon,
+  User, Map, ExternalLink, ImageIcon, Loader2,
 } from "lucide-react";
 import { useSearch } from "wouter";
 import { useApp } from "@/context/AppContext";
 import { useEnsureData } from "@/hooks/useEnsureData";
+import { toast } from "@/hooks/use-toast";
 import { SERVICE_CATEGORIES } from "@/types";
-import { Badge, inputCls, getMapEmbedUrl, type StatusFilter } from "@/pages/admin/shared";
+import { Badge, inputCls, getMapEmbedUrl, ProfileActionBanner, type StatusFilter } from "@/pages/admin/shared";
 import { downloadTrustCard } from "@/components/TrustCardShare";
+
+type ProfileActionState = { profileId: string; action: "approving" | "rejecting" } | null;
 
 export default function AdminProfiles() {
   const searchParams = useSearch();
@@ -24,11 +27,94 @@ export default function AdminProfiles() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [editProfileMode, setEditProfileMode] = useState(false);
   const [editProfileData, setEditProfileData] = useState({ category: "", customCategory: "", description: "", tags: "" });
+  const [actionState, setActionState] = useState<ProfileActionState>(null);
+  const [generatingCardIds, setGeneratingCardIds] = useState<Set<string>>(() => new Set());
 
   const loading = useEnsureData(() => ensureAdminProfiles(), [ensureAdminProfiles]);
 
+  const isActionBusy = actionState !== null;
+
+  useEffect(() => {
+    if (loading) return;
+    setGeneratingCardIds((prev) => {
+      const next = new Set(prev);
+      let changed = false;
+      for (const p of profiles) {
+        if (p.approvalStatus === "approved" && !p.trustCardUrl && !next.has(p.id)) {
+          next.add(p.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [loading, profiles]);
+
+  useEffect(() => {
+    if (generatingCardIds.size === 0) return;
+    const interval = setInterval(() => {
+      void ensureAdminProfiles();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [generatingCardIds.size, ensureAdminProfiles]);
+
+  useEffect(() => {
+    setGeneratingCardIds((prev) => {
+      if (prev.size === 0) return prev;
+      const next = new Set(prev);
+      let changed = false;
+      for (const id of prev) {
+        const profile = profiles.find((p) => p.id === id);
+        if (profile?.trustCardUrl) {
+          next.delete(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [profiles]);
+
+  const handleApprove = useCallback(async (profileId: string, profileName: string) => {
+    if (actionState) return;
+    setActionState({ profileId, action: "approving" });
+    try {
+      await updateProfile(profileId, { approvalStatus: "approved", verified: true });
+      setGeneratingCardIds((prev) => new Set(prev).add(profileId));
+      toast({
+        title: "Profile approved",
+        description: `${profileName} is live. The digital business card is being generated (about 30–60 seconds).`,
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Approval failed",
+        description: "Something went wrong. Please wait a moment and try again once.",
+      });
+    } finally {
+      setActionState(null);
+    }
+  }, [actionState, updateProfile]);
+
+  const handleReject = useCallback(async (profileId: string) => {
+    if (actionState) return;
+    setActionState({ profileId, action: "rejecting" });
+    try {
+      await updateProfile(profileId, { approvalStatus: "rejected" });
+      toast({ title: "Profile rejected" });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Rejection failed",
+        description: "Please wait a moment and try again once.",
+      });
+    } finally {
+      setActionState(null);
+    }
+  }, [actionState, updateProfile]);
+
   const pendingProfiles = profiles.filter((p) => p.approvalStatus === "pending");
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
+  const selectedAction = actionState?.profileId === selectedProfileId ? actionState.action : null;
+  const isGeneratingCard = selectedProfileId ? generatingCardIds.has(selectedProfileId) && !selectedProfile?.trustCardUrl : false;
 
   const openProfileEdit = (p: NonNullable<typeof selectedProfile>) => {
     setEditProfileMode(true);
@@ -90,6 +176,11 @@ export default function AdminProfiles() {
                         <div className="text-[10px] text-muted-foreground truncate">{p.category} · {p.area}</div>
                         <div className="flex items-center gap-1.5 mt-1">
                           <Badge status={p.approvalStatus} />
+                          {generatingCardIds.has(p.id) && !p.trustCardUrl && (
+                            <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 inline-flex items-center gap-0.5">
+                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Card…
+                            </span>
+                          )}
                           {p.verified && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">Verified</span>}
                           {p.mapUrl && <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200">Map</span>}
                         </div>
@@ -121,32 +212,60 @@ export default function AdminProfiles() {
                   </div>
 
                   <div className="p-5 space-y-5">
+                    {selectedAction === "approving" && <ProfileActionBanner variant="approving" />}
+                    {selectedAction === "rejecting" && <ProfileActionBanner variant="rejecting" />}
+                    {!selectedAction && isGeneratingCard && (
+                      <ProfileActionBanner variant="card-generating" profileName={selectedProfile.name} />
+                    )}
+
                     {/* Action bar */}
                     <div className="flex flex-wrap gap-2 p-4 rounded-xl bg-muted/40 border border-border">
                       {selectedProfile.approvalStatus !== "approved" && (
-                        <button onClick={() => updateProfile(selectedProfile.id, { approvalStatus: "approved", verified: true })}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 border border-emerald-200">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                        <button
+                          type="button"
+                          disabled={isActionBusy}
+                          onClick={() => void handleApprove(selectedProfile.id, selectedProfile.name)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 ${
+                            isActionBusy ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-100"
+                          }`}
+                        >
+                          {selectedAction === "approving" ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          )}
+                          {selectedAction === "approving" ? "Approving…" : "Approve"}
                         </button>
                       )}
                       {selectedProfile.approvalStatus !== "rejected" && (
-                        <button onClick={() => updateProfile(selectedProfile.id, { approvalStatus: "rejected" })}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 text-red-700 text-xs font-bold hover:bg-red-100 border border-red-200">
-                          <XCircle className="w-3.5 h-3.5" /> Reject
+                        <button
+                          type="button"
+                          disabled={isActionBusy}
+                          onClick={() => void handleReject(selectedProfile.id)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 text-red-700 text-xs font-bold border border-red-200 ${
+                            isActionBusy ? "opacity-50 cursor-not-allowed" : "hover:bg-red-100"
+                          }`}
+                        >
+                          {selectedAction === "rejecting" ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
+                          {selectedAction === "rejecting" ? "Rejecting…" : "Reject"}
                         </button>
                       )}
-                      <button onClick={() => updateProfile(selectedProfile.id, { verified: !selectedProfile.verified })}
-                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${selectedProfile.verified ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"}`}>
+                      <button type="button" disabled={isActionBusy} onClick={() => updateProfile(selectedProfile.id, { verified: !selectedProfile.verified })}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${selectedProfile.verified ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"} ${isActionBusy ? "opacity-50 cursor-not-allowed" : ""}`}>
                         <Shield className="w-3.5 h-3.5" />
                         {selectedProfile.verified ? "Unverify" : "Verify"}
                       </button>
-                      <button onClick={() => updateProfile(selectedProfile.id, { available: !selectedProfile.available })}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold hover:bg-muted/80 border border-border">
+                      <button type="button" disabled={isActionBusy} onClick={() => updateProfile(selectedProfile.id, { available: !selectedProfile.available })}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-bold border border-border ${isActionBusy ? "opacity-50 cursor-not-allowed" : "hover:bg-muted/80"}`}>
                         <RefreshCw className="w-3.5 h-3.5" />
                         {selectedProfile.available ? "Mark Unavailable" : "Mark Available"}
                       </button>
-                      <button onClick={() => openProfileEdit(selectedProfile)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/15 border border-primary/20">
+                      <button type="button" disabled={isActionBusy} onClick={() => openProfileEdit(selectedProfile)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary text-xs font-bold border border-primary/20 ${isActionBusy ? "opacity-50 cursor-not-allowed" : "hover:bg-primary/15"}`}>
                         <Edit2 className="w-3.5 h-3.5" /> Edit Details
                       </button>
                       <button onClick={() => { deleteProfile(selectedProfile.id); setSelectedProfileId(null); }}
@@ -191,6 +310,14 @@ export default function AdminProfiles() {
                     </AnimatePresence>
 
                     {/* Trust card */}
+                    {isGeneratingCard && (
+                      <div className="p-4 rounded-xl border border-dashed border-amber-200 bg-amber-50/40">
+                        <div className="flex items-center gap-2 text-xs text-amber-900/80">
+                          <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                          Preparing download link for the business card…
+                        </div>
+                      </div>
+                    )}
                     {selectedProfile.trustCardUrl && (
                       <div className="p-4 rounded-xl border border-border bg-card">
                         <h3 className="font-bold text-sm text-foreground mb-2">Digital Business Card</h3>

@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 export type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -49,6 +49,68 @@ export function ActionBtns({ onApprove, onReject }: { onApprove: () => void; onR
       <button onClick={onReject} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-bold hover:bg-red-100 border border-red-200 transition-colors">
         <XCircle className="w-3.5 h-3.5" /> Reject
       </button>
+    </div>
+  );
+}
+
+type ProfileActionBannerProps = {
+  variant: "approving" | "rejecting" | "card-generating" | "card-ready";
+  profileName?: string;
+};
+
+export function ProfileActionBanner({ variant, profileName }: ProfileActionBannerProps) {
+  if (variant === "approving") {
+    return (
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-primary/30 bg-primary/5">
+        <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-bold text-foreground">Approving profile…</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Please wait — do not click Approve again.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "rejecting") {
+    return (
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-red-200 bg-red-50/80">
+        <Loader2 className="w-5 h-5 text-red-600 animate-spin flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-bold text-foreground">Rejecting profile…</p>
+          <p className="text-xs text-muted-foreground mt-1">Please wait — do not click again.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "card-generating") {
+    return (
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50/90">
+        <Loader2 className="w-5 h-5 text-amber-600 animate-spin flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-bold text-foreground">
+            {profileName ? `${profileName} is approved` : "Profile approved"}
+          </p>
+          <p className="text-xs text-amber-900/80 mt-1 leading-relaxed">
+            Generating the digital business card now. This usually takes 30–60 seconds.
+            You can review other profiles — the download link will appear here when ready.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50/90">
+      <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+      <div>
+        <p className="text-sm font-bold text-foreground">Business card ready</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          The trust card was generated successfully. Use Download card below.
+        </p>
+      </div>
     </div>
   );
 }
