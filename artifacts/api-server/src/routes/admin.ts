@@ -16,7 +16,8 @@ import {
 } from "@workspace/db";
 import { asyncHandler } from "../lib/async-handler";
 import { HttpError } from "../lib/http-error";
-import { scheduleTrustCardGeneration } from "../lib/trust-card";
+import { logger } from "../lib/logger";
+import { generateAndUploadTrustCard } from "../lib/trust-card";
 import {
   parseIdParam,
   serializeJob,
@@ -201,7 +202,11 @@ router.patch(
     }
 
     if (body.approvalStatus === "approved") {
-      scheduleTrustCardGeneration(id);
+      try {
+        await generateAndUploadTrustCard(id);
+      } catch (err) {
+        logger.error({ err, profileId: id }, "Trust card generation failed after profile approval");
+      }
     }
 
     const updated = await db.query.serviceProfilesTable.findFirst({

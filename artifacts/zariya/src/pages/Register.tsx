@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2,
-  Users, Wrench, Store, ChevronDown,
+  Users, Wrench, Store, ChevronDown, Instagram, Globe,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { NAVSARI_AREAS, BRAND, UserType, SERVICE_PROVIDER_CATEGORIES, BUSINESS_CATEGORIES } from "@/types";
@@ -75,6 +75,8 @@ export default function Register() {
     password: "",
     phone: "",
     whatsappNumber: "",
+    instagramUrl: "",
+    websiteUrl: "",
     city: "Navsari City",
     district: "Navsari",
   });
@@ -132,6 +134,8 @@ export default function Register() {
       serviceCategory: finalCategory || undefined,
       city: form.city,
       district: "Navsari",
+      instagramUrl: form.instagramUrl.trim() || undefined,
+      websiteUrl: form.websiteUrl.trim() || undefined,
     });
     setLoading(false);
     if (result.success) {
@@ -304,6 +308,7 @@ export default function Register() {
                 </div>
 
                 {(form.type === "service_provider" || form.type === "business_owner") && (
+                  <>
                   <div>
                     <label className="text-sm font-semibold text-foreground block mb-1.5">
                       WhatsApp number <span className="text-muted-foreground font-normal">(optional, for bookings)</span>
@@ -316,6 +321,41 @@ export default function Register() {
                       className={inputCls("whatsappNumber")}
                     />
                   </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-foreground block mb-1.5">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Instagram className="w-3.5 h-3.5" />
+                        Instagram profile
+                      </span>{" "}
+                      <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.instagramUrl}
+                      onChange={(e) => set("instagramUrl", e.target.value)}
+                      placeholder="@yourpage or instagram.com/yourpage"
+                      className={inputCls("instagramUrl")}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-foreground block mb-1.5">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5" />
+                        Website link
+                      </span>{" "}
+                      <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={form.websiteUrl}
+                      onChange={(e) => set("websiteUrl", e.target.value)}
+                      placeholder="https://yourwebsite.com"
+                      className={inputCls("websiteUrl")}
+                    />
+                  </div>
+                  </>
                 )}
 
                 {/* District — locked */}

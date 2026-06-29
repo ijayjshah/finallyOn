@@ -31,6 +31,8 @@ export function serializeUser(user: User) {
     city: user.city,
     district: user.districtName,
     serviceCategory: user.serviceCategory ?? undefined,
+    instagramUrl: user.instagramUrl ?? undefined,
+    websiteUrl: user.websiteUrl ?? undefined,
     role: user.role,
     status: user.status,
     onboardingCompleted: Boolean(user.onboardingCompletedAt),

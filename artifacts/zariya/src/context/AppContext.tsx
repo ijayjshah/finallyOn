@@ -80,6 +80,8 @@ function toAppUser(user: ApiUser): AppUser {
     whatsappNumber: user.whatsappNumber,
     type: user.type,
     serviceCategory: user.serviceCategory,
+    instagramUrl: user.instagramUrl,
+    websiteUrl: user.websiteUrl,
     city: user.city,
     district: user.district,
     role: user.role,
@@ -241,6 +243,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       city: data.city,
       district: data.district,
       serviceCategory: data.serviceCategory,
+      instagramUrl: data.instagramUrl,
+      websiteUrl: data.websiteUrl,
     });
     if (res.error || !res.data) {
       return { success: false, error: res.error ?? "Registration failed." };

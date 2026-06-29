@@ -9,6 +9,8 @@ export interface User {
   whatsappNumber: string;
   type: UserType;
   serviceCategory?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
   city: string;
   district: string;
   role?: 'user' | 'admin';

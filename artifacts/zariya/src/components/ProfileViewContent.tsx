@@ -120,12 +120,12 @@ export default function ProfileViewContent({
           </div>
         )}
 
-        {isOwner && profile.approvalStatus === "approved" && profile.trustCardUrl && (
-          <TrustCardShare
-            trustCardUrl={profile.trustCardUrl}
-            profileName={profile.name}
-          />
-        )}
+      {isOwner && profile.approvalStatus === "approved" && (
+        <TrustCardShare
+          trustCardUrl={profile.trustCardUrl}
+          profileName={profile.name}
+        />
+      )}
 
         <div className="p-5 rounded-2xl border border-border bg-card">
           <div className="flex items-start justify-between mb-3">

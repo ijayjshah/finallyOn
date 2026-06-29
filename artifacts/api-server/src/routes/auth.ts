@@ -29,6 +29,8 @@ const registerSchema = z.object({
   city: z.string().min(1),
   district: z.string().min(1),
   serviceCategory: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  websiteUrl: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -65,6 +67,8 @@ router.post(
         city: body.city,
         districtName: body.district,
         serviceCategory: body.serviceCategory,
+        instagramUrl: body.instagramUrl?.trim() || null,
+        websiteUrl: body.websiteUrl?.trim() || null,
         status: "active",
         emailVerifiedAt: new Date(),
       })

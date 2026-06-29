@@ -12,6 +12,7 @@ import { asyncHandler } from "../lib/async-handler";
 import { HttpError } from "../lib/http-error";
 import { parseIdParam, serializeProfile } from "../lib/serializers";
 import { uniqueProfileSlug } from "../lib/profile-slug";
+import { generateAndUploadTrustCard } from "../lib/trust-card";
 import { requireAuth } from "../middleware/auth";
 
 const router: IRouter = Router();
@@ -127,6 +128,28 @@ router.get(
     });
 
     res.json({ profile: profile ? serializeProfile(profile) : null });
+  }),
+);
+
+router.post(
+  "/me/trust-card",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const profile = await db.query.serviceProfilesTable.findFirst({
+      where: eq(serviceProfilesTable.userId, req.user!.id),
+      columns: { id: true, approvalStatus: true },
+    });
+    if (!profile) throw new HttpError(404, "Profile not found");
+    if (profile.approvalStatus !== "approved") {
+      throw new HttpError(400, "Your profile must be approved before downloading a business card.");
+    }
+
+    const trustCardUrl = await generateAndUploadTrustCard(profile.id);
+    if (!trustCardUrl) {
+      throw new HttpError(500, "Could not generate your business card. Try again later.");
+    }
+
+    res.json({ trustCardUrl });
   }),
 );
 

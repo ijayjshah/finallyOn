@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Download, ImageIcon, Loader2 } from "lucide-react";
 import { BRAND } from "@/types";
+import { api } from "@/lib/api";
 
 interface TrustCardShareProps {
-  trustCardUrl: string;
+  trustCardUrl?: string;
   profileName: string;
 }
 
@@ -18,15 +19,33 @@ export async function downloadTrustCard(trustCardUrl: string, profileName: strin
   URL.revokeObjectURL(url);
 }
 
+async function resolveTrustCardUrl(currentUrl?: string): Promise<string> {
+  if (currentUrl) return currentUrl;
+  const res = await api.generateMyTrustCard();
+  if (res.error || !res.data?.trustCardUrl) {
+    throw new Error(res.error ?? "Could not prepare your business card.");
+  }
+  return res.data.trustCardUrl;
+}
+
 export default function TrustCardShare({ trustCardUrl, profileName }: TrustCardShareProps) {
+  const [url, setUrl] = useState(trustCardUrl);
   const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDownload = async () => {
     setDownloading(true);
+    setError(null);
     try {
-      await downloadTrustCard(trustCardUrl, profileName);
-    } catch {
-      window.open(trustCardUrl, "_blank", "noopener,noreferrer");
+      const resolved = await resolveTrustCardUrl(url);
+      setUrl(resolved);
+      await downloadTrustCard(resolved, profileName);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Download failed.";
+      setError(message);
+      if (url) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
     } finally {
       setDownloading(false);
     }
@@ -47,6 +66,7 @@ export default function TrustCardShare({ trustCardUrl, profileName }: TrustCardS
       </div>
 
       <button
+        type="button"
         onClick={() => void handleDownload()}
         disabled={downloading}
         className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-70"
@@ -56,8 +76,9 @@ export default function TrustCardShare({ trustCardUrl, profileName }: TrustCardS
         ) : (
           <Download className="w-4 h-4" />
         )}
-        {downloading ? "Downloading…" : "Download business card"}
+        {downloading ? "Preparing your card…" : "Download business card"}
       </button>
+      {error && <p className="text-xs text-destructive mt-2 text-center">{error}</p>}
     </div>
   );
 }

@@ -33,6 +33,8 @@ export const usersTable = pgTable(
     }),
     districtName: text("district_name").notNull(),
     serviceCategory: text("service_category"),
+    instagramUrl: text("instagram_url"),
+    websiteUrl: text("website_url"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     onboardingCompletedAt: timestamp("onboarding_completed_at", {
       withTimezone: true,

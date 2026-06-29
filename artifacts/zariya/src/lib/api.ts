@@ -59,6 +59,8 @@ export const api = {
     city: string;
     district: string;
     serviceCategory?: string;
+    instagramUrl?: string;
+    websiteUrl?: string;
   }) {
     return request<{ user: ApiUser }>("/auth/register", {
       method: "POST",
@@ -89,6 +91,12 @@ export const api = {
 
   async getMyProfile() {
     return request<{ profile: ServiceProfile | null }>("/profiles/me");
+  },
+
+  async generateMyTrustCard() {
+    return request<{ trustCardUrl: string }>("/profiles/me/trust-card", {
+      method: "POST",
+    });
   },
 
   async getProfile(id: string) {
